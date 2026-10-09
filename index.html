@@ -343,4 +343,244 @@
                             </thead>
                             <tbody class="divide-y divide-slate-800">
                                 <tr class="hover:bg-space-700/30">
-                                    <td class="p-4 font-
+                                    <td class="p-4 font-semibold text-white">Ahmad Fauzan</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Tuntas</span></td>
+                                    <td class="p-4 text-cyan-400">Level 3 (Selesai)</td>
+                                    <td class="p-4 font-bold text-emerald-400">95</td>
+                                </tr>
+                                <tr class="hover:bg-space-700/30">
+                                    <td class="p-4 font-semibold text-white">Dewi Lestari</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Tuntas</span></td>
+                                    <td class="p-4 text-cyan-400">Level 3 (Selesai)</td>
+                                    <td class="p-4 font-bold text-emerald-400">100</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="teacherTab === 'modul'" class="space-y-6 max-w-3xl mx-auto">
+                <div class="p-8 rounded-3xl bg-space-800/80 border border-slate-800 space-y-4 shadow-2xl">
+                    <span class="text-xs text-indigo-400 font-semibold uppercase tracking-wider">Perangkat Ajar Kurikulum Merdeka</span>
+                    <h3 class="text-xl font-bold text-white">Modul Ajar Bab VII: Bumi dan Tata Surya</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Panduan lengkap ATP, Lembar Kerja Peserta Didik (LKPD), dan rubrik penilaian formatif sumatif.
+                    </p>
+                    <button @click="alert('Mengunduh Modul Ajar PDF...')" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg">Unduh Modul Ajar (PDF)</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL LOGIN -->
+    <div x-show="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4" x-cloak>
+        <div class="bg-space-800 border border-slate-700 w-full max-w-md rounded-3xl p-8 space-y-6 shadow-2xl relative">
+            <div class="text-center space-y-2">
+                <h3 class="text-2xl font-extrabold text-white">Masuk ke Portal</h3>
+                <p class="text-xs text-slate-400">Masukkan nama lengkap dan pilih peran akun Anda.</p>
+            </div>
+            <div class="flex bg-space-900 p-1.5 rounded-2xl border border-slate-700">
+                <button @click="loginType = 'siswa'" :class="loginType === 'siswa' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition">Siswa</button>
+                <button @click="loginType = 'guru'" :class="loginType === 'guru' ? 'bg-indigo-600 text-white' : 'text-slate-400'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition">Guru</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1.5">Nama Lengkap</label>
+                    <input type="text" x-model="inputName" placeholder="Contoh: Budi Santoso" class="w-full bg-space-900 border border-slate-700 rounded-2xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <button @click="login()" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 font-bold rounded-2xl text-white transition shadow-xl">Masuk Sekarang</button>
+            </div>
+            <button @click="showLoginModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm">✕</button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-space-800/90 border-t border-slate-800 py-6 text-center text-xs text-slate-400">
+        <p>Kotak Planetarium Digital &copy; 2026. Media Pembelajaran Interaktif IPA Kurikulum Merdeka[cite: 6].</p>
+    </footer>
+
+    <!-- SCRIPT UTAMA & LOGIKA 4D CANVAS -->
+    <script>
+        function spaceApp() {
+            return {
+                currentPortal: 'landing',
+                isLoggedIn: false,
+                userRole: '',
+                userName: '',
+                showLoginModal: false,
+                loginType: 'siswa',
+                inputName: '',
+                openPortal(role) {
+                    if(this.isLoggedIn && this.userRole === role) {
+                        this.currentPortal = role;
+                    } else {
+                        this.loginType = role;
+                        this.showLoginModal = true;
+                    }
+                },
+                login() {
+                    if(this.inputName.trim() !== '') {
+                        this.userName = this.inputName;
+                        this.userRole = this.loginType;
+                        this.isLoggedIn = true;
+                        this.showLoginModal = false;
+                        this.currentPortal = this.loginType;
+                        localStorage.setItem('space_user', JSON.stringify({name: this.userName, role: this.userRole}));
+                    }
+                },
+                logout() {
+                    this.isLoggedIn = false;
+                    this.userName = '';
+                    this.userRole = '';
+                    this.currentPortal = 'landing';
+                    localStorage.removeItem('space_user');
+                },
+                init() {
+                    const saved = localStorage.getItem('space_user');
+                    if(saved) {
+                        const data = JSON.parse(saved);
+                        this.userName = data.name;
+                        this.userRole = data.role;
+                        this.isLoggedIn = true;
+                    }
+                    setTimeout(() => initSpaceCanvas(), 500);
+                }
+            }
+        }
+
+        function studentPortalData() {
+            return {
+                activeTab: 'simulasi4d',
+                selectedPlanetData: {
+                    name: 'Bumi',
+                    desc: 'Bumi adalah planet ketiga dari matahari dan satu-satunya tempat yang diketahui menopang kehidupan.',
+                    distance: '150 Juta km',
+                    feature: 'Atmosfer kaya oksigen & air cair'
+                }
+            }
+        }
+
+        function spaceGameData() {
+            return {
+                gameActive: true,
+                gameWon: false,
+                gameScore: 0,
+                gameLives: 3,
+                currentMission: 0,
+                missions: [
+                    { question: 'Planet manakah yang memiliki cincin paling megah di tata surya?', options: ['Jupiter', 'Saturnus', 'Mars', 'Uranus'], answer: 'Saturnus' },
+                    { question: 'Benda langit yang sering disebut bintang bintang beralih adalah...', options: ['Komet', 'Meteoroid', 'Asteroid', 'Satelit'], answer: 'Meteoroid' },
+                    { question: 'Berapa lama waktu yang dibutuhkan bumi untuk satu kali revolusi?', options: ['24 Jam', '30 Hari', '365,25 Hari', '12 Jam'], answer: '365,25 Hari' }
+                ],
+                answerMission(opt) {
+                    if(opt === this.missions[this.currentMission].answer) {
+                        this.gameScore += 35;
+                        if(this.currentMission < this.missions.length - 1) {
+                            this.currentMission++;
+                        } else {
+                            this.gameActive = false;
+                            this.gameWon = true;
+                        }
+                    } else {
+                        this.gameLives--;
+                        if(this.gameLives <= 0) {
+                            this.gameActive = false;
+                            this.gameWon = false;
+                        } else {
+                            alert('Jawaban kurang tepat! Nyawa berkurang.');
+                        }
+                    }
+                },
+                restartGame() {
+                    this.gameActive = true;
+                    this.gameWon = false;
+                    this.gameScore = 0;
+                    this.gameLives = 3;
+                    this.currentMission = 0;
+                }
+            }
+        }
+
+        function quizLogic() {
+            return {
+                qIndex: 1,
+                userAns1: '',
+                userAns2: '',
+                quizDone: false,
+                finalScore: 0,
+                submitQuiz() {
+                    let score = 0;
+                    if(this.userAns1 === 'B') score += 50;
+                    if(this.userAns2 === 'B') score += 50;
+                    this.finalScore = score;
+                    this.quizDone = true;
+                }
+            }
+        }
+
+        // KANVAS RENDERER SIMULASI TATA SURYA 4D REAL-TIME
+        function initSpaceCanvas() {
+            const canvas = document.getElementById('spaceCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = 450;
+
+            const planets = [
+                { name: 'Merkurius', radius: 6, orbit: 55, speed: 0.04, color: '#A8A29E', desc: 'Planet terkecil & terdekat dengan matahari.' },
+                { name: 'Venus', radius: 9, orbit: 85, speed: 0.03, color: '#FBBF24', desc: 'Planet terpanas dengan atmosfer tebal.' },
+                { name: 'Bumi', radius: 10, orbit: 125, speed: 0.02, color: '#38BDF8', desc: 'Rumah bagi seluruh makhluk hidup.' },
+                { name: 'Mars', radius: 8, orbit: 165, speed: 0.015, color: '#F87171', desc: 'Planet merah kaya kandungan besi.' },
+                { name: 'Jupiter', radius: 18, orbit: 220, speed: 0.01, color: '#FB923C', desc: 'Planet raksasa gas terbesar.' }
+            ];
+
+            let angles = planets.map(() => Math.random() * Math.PI * 2);
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+
+                // Gambar Matahari
+                ctx.beginPath();
+                ctx.arc(cx, cy, 25, 0, Math.PI * 2);
+                const sunGradient = ctx.createRadialGradient(cx, cy, 5, cx, cy, 25);
+                sunGradient.addColorStop(0, '#FEF08A');
+                sunGradient.addColorStop(1, '#F59E0B');
+                ctx.fillStyle = sunGradient;
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = '#F59E0B';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Gambar Planet & Orbit
+                planets.forEach((p, index) => {
+                    angles[index] += p.speed;
+                    const x = cx + Math.cos(angles[index]) * p.orbit;
+                    const y = cy + Math.sin(angles[index]) * p.orbit;
+
+                    // Garis Orbit
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, p.orbit, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
+                    ctx.stroke();
+
+                    // Badan Planet
+                    ctx.beginPath();
+                    ctx.arc(x, y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = p.color;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>
