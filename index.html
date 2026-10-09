@@ -12,9 +12,9 @@
                 extend: {
                     colors: {
                         space: {
-                            900: '#040712',
-                            800: '#0B132B',
-                            700: '#1C2541',
+                            900: '#02040A',
+                            800: '#0B0F19',
+                            700: '#161E31',
                             accent: '#4361EE',
                             glow: '#4CC9F0'
                         }
@@ -28,29 +28,21 @@
     <!-- Font Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #02040A; color: #F8FAFC; }
         .galaxy-bg {
             background-image: 
-                radial-gradient(white, rgba(255,255,255,0.3) 2px, transparent 3px),
-                radial-gradient(rgba(67,97,238,0.25), transparent 80px),
-                radial-gradient(rgba(76,201,240,0.15), transparent 120px);
-            background-size: 450px 450px, 300px 300px, 500px 500px;
-            animation: moveGalaxy 50s linear infinite;
+                radial-gradient(white, rgba(255,255,255,0.25) 1.5px, transparent 2px),
+                radial-gradient(rgba(67,97,238,0.2), transparent 100px),
+                radial-gradient(rgba(76,201,240,0.15), transparent 150px);
+            background-size: 350px 350px, 500px 500px, 700px 700px;
         }
-        @keyframes moveGalaxy {
-            from { background-position: 0 0, 0 0, 0 0; }
-            to { background-position: 450px 450px, 300px 300px, 500px 500px; }
-        }
-        .planet-shadow {
-            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.8), 0 0 25px rgba(76,201,240,0.4);
-        }
+        canvas { display: block; }
     </style>
 </head>
-<body class="bg-space-900 galaxy-bg text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white" 
-      x-data="appData()">
+<body class="galaxy-bg min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white" x-data="spaceApp()">
 
-    <!-- HEADER / NAVBAR -->
-    <header class="bg-space-800/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 shadow-xl">
+    <!-- HEADER / NAVBAR UTAMA -->
+    <header class="bg-space-800/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 shadow-2xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" @click="currentPortal = 'landing'">
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-cyan-500/30">
@@ -62,20 +54,20 @@
                 </div>
             </div>
 
-            <!-- Navigasi & Akun -->
+            <!-- Navigasi Akun -->
             <div class="flex items-center space-x-4">
                 <template x-if="currentPortal !== 'landing'">
-                    <button @click="currentPortal = 'landing'" class="text-sm px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition text-slate-300 flex items-center space-x-2">
-                        <span>← Keluar Portal</span>
+                    <button @click="currentPortal = 'landing'" class="text-sm px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition text-slate-300">
+                        ← Kembali ke Beranda
                     </button>
                 </template>
 
                 <template x-if="!isLoggedIn">
-                    <button @click="showLoginModal = true" class="text-sm font-semibold px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 transition shadow-lg shadow-indigo-600/30">Masuk Akun</button>
+                    <button @click="showLoginModal = true" class="text-sm font-semibold px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 transition shadow-lg shadow-indigo-600/30">Masuk Akun</button>
                 </template>
 
                 <template x-if="isLoggedIn">
-                    <div class="flex items-center space-x-3 bg-space-700/80 border border-slate-700 px-4 py-2 rounded-2xl shadow-inner">
+                    <div class="flex items-center space-x-3 bg-space-700/80 border border-slate-700 px-4 py-2 rounded-2xl">
                         <div class="w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-500/50 flex items-center justify-center font-bold text-cyan-300 text-sm" x-text="userName.charAt(0).toUpperCase()"></div>
                         <div class="text-left">
                             <span class="block text-xs font-bold text-white" x-text="userName"></span>
@@ -100,14 +92,14 @@
                         <span>Media Pembelajaran Interaktif Bab VII</span>
                     </div>
                     <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                        Eksplorasi Semesta <span class="bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-400 bg-clip-text text-transparent">Bumi & Tata Surya</span>
+                        Jelajahi Semesta <span class="bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-400 bg-clip-text text-transparent">Bumi & Tata Surya</span>
                     </h1>
                     <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
-                        Platform edukasi sains modern dilengkapi simulasi AR 4D Ultra Visual, materi mendalam Kurikulum Merdeka, serta dasbor evaluasi nilai interaktif.
+                        Platform edukasi sains lengkap dengan simulasi tata surya interaktif real-time 4D, materi bab mendalam Kurikulum Merdeka, serta game petualangan luar angkasa[cite: 6].
                     </p>
                     <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-2">
                         <button @click="openPortal('siswa')" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold transition shadow-xl shadow-indigo-600/30 flex items-center justify-center space-x-2">
-                            <span>Mulai Belajar (Siswa)</span>
+                            <span>Masuk Portal Siswa</span>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                         </button>
                         <button @click="openPortal('guru')" class="px-8 py-4 rounded-2xl bg-space-800 hover:bg-space-700 border border-slate-700 text-slate-200 font-bold transition flex items-center justify-center space-x-2">
@@ -116,184 +108,191 @@
                     </div>
                 </div>
 
-                <!-- Animasi 3D Tata Surya Bergerak di Beranda -->
-                <div class="relative w-full h-[400px] sm:h-[480px] flex items-center justify-center bg-space-800/40 rounded-3xl border border-slate-800 overflow-hidden shadow-2xl">
-                    <div class="absolute w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 shadow-2xl shadow-amber-500/70 animate-pulse flex items-center justify-center text-xs font-black text-space-900 z-10">Matahari</div>
-                    
-                    <div class="absolute w-44 h-44 rounded-full border border-indigo-500/20"></div>
-                    <div class="absolute w-44 h-44 animate-spin" style="animation-duration: 4s;">
-                        <div class="w-3.5 h-3.5 bg-cyan-300 rounded-full absolute top-0 left-1/2 -translate-x-1/2 shadow-md shadow-cyan-400"></div>
+                <!-- Preview Simulasi 3D di Landing -->
+                <div class="relative w-full h-[400px] flex items-center justify-center bg-space-800/50 rounded-3xl border border-slate-800 overflow-hidden shadow-2xl">
+                    <div class="absolute w-24 h-24 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 shadow-2xl shadow-amber-500/80 animate-pulse flex items-center justify-center text-xs font-black text-space-900 z-10">MATAHARI</div>
+                    <div class="absolute w-48 h-48 rounded-full border border-indigo-500/30"></div>
+                    <div class="absolute w-48 h-48 animate-spin" style="animation-duration: 6s;">
+                        <div class="w-4 h-4 bg-cyan-400 rounded-full absolute top-0 left-1/2 -translate-x-1/2 shadow-lg shadow-cyan-400"></div>
                     </div>
-
                     <div class="absolute w-72 h-72 rounded-full border border-cyan-500/20"></div>
-                    <div class="absolute w-72 h-72 animate-spin" style="animation-duration: 9s;">
-                        <div class="w-5 h-5 bg-blue-500 rounded-full absolute top-0 left-1/2 -translate-x-1/2 shadow-lg shadow-blue-500 flex items-center justify-center">
-                            <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                        </div>
+                    <div class="absolute w-72 h-72 animate-spin" style="animation-duration: 12s;">
+                        <div class="w-5 h-5 bg-blue-500 rounded-full absolute top-0 left-1/2 -translate-x-1/2 shadow-lg shadow-blue-500"></div>
                     </div>
-
-                    <div class="absolute w-[360px] h-[360px] rounded-full border border-purple-500/20"></div>
-                    <div class="absolute w-[360px] h-[360px] animate-spin" style="animation-duration: 15s;">
-                        <div class="w-6 h-6 bg-red-400 rounded-full absolute top-0 left-1/2 -translate-x-1/2 shadow-lg shadow-red-500"></div>
-                    </div>
-                    
                     <div class="absolute bottom-4 text-xs text-cyan-300 bg-space-900/80 px-4 py-1.5 rounded-full border border-slate-700 font-medium">
-                        ✨ Simulasi Interaktif Tata Surya 3D Berputar
+                        ✨ Simulasi Orbit Real-Time 4D
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 2. PORTAL SISWA -->
-        <section x-show="currentPortal === 'siswa'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="{ studentMenu: 'dashboard' }">
+        <!-- 2. PORTAL SISWA (LANGSUNG DASHBOARD UTAMA DENGAN VISUAL 4D TATA SURYA) -->
+        <section x-show="currentPortal === 'siswa'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="studentPortalData()">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 mb-8 border-b border-slate-800 gap-4">
                 <div>
-                    <h2 class="text-3xl font-extrabold text-white">Dashboard Siswa</h2>
-                    <p class="text-sm text-slate-400">Selamat datang kembali, <strong class="text-cyan-400" x-text="userName || 'Siswa'"></strong>! Pilih menu belajar di bawah ini.</p>
+                    <h2 class="text-3xl font-extrabold text-white">Dashboard Utama Siswa</h2>
+                    <p class="text-sm text-slate-400">Selamat datang, <strong class="text-cyan-400" x-text="userName || 'Siswa'"></strong>! Silakan pilih menu eksplorasi.</p>
                 </div>
-                <!-- Menu Navigasi Siswa -->
+                <!-- Menu Tab Navigasi -->
                 <div class="flex flex-wrap gap-2 bg-space-800 p-2 rounded-2xl border border-slate-700 shadow-xl">
-                    <button @click="studentMenu = 'dashboard'" :class="studentMenu === 'dashboard' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-sm font-semibold transition">Beranda Siswa</button>
-                    <button @click="studentMenu = 'materi'" :class="studentMenu === 'materi' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-sm font-semibold transition">Materi Inti</button>
-                    <button @click="studentMenu = 'ar4d'" :class="studentMenu === 'ar4d' ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-lg shadow-cyan-500/30' : 'text-cyan-400 hover:text-white'" class="px-4 py-2 rounded-xl text-sm font-bold transition flex items-center space-x-1.5">
-                        <span>✨ Simulasi AR 4D Ultra</span>
+                    <button @click="activeTab = 'simulasi4d'" :class="activeTab === 'simulasi4d' ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-lg shadow-cyan-500/30' : 'text-slate-300 hover:text-white'" class="px-4 py-2 rounded-xl text-sm font-bold transition flex items-center space-x-1.5">
+                        <span>🚀 Visual 4D Tata Surya</span>
                     </button>
-                    <button @click="studentMenu = 'kuis'" :class="studentMenu === 'kuis' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-sm font-semibold transition">Evaluasi Kuis</button>
+                    <button @click="activeTab = 'materi'" :class="activeTab === 'materi' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-white'" class="px-4 py-2 rounded-xl text-sm font-semibold transition">📖 Materi Lengkap</button>
+                    <button @click="activeTab = 'game'" :class="activeTab === 'game' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-300 hover:text-white'" class="px-4 py-2 rounded-xl text-sm font-bold transition">🎮 Game Petualangan AR</button>
+                    <button @click="activeTab = 'kuis'" :class="activeTab === 'kuis' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-white'" class="px-4 py-2 rounded-xl text-sm font-semibold transition">⭐ Kuis & Evaluasi</button>
                 </div>
             </div>
 
-            <!-- Sub-Menu 1: Dashboard Siswa -->
-            <div x-show="studentMenu === 'dashboard'" class="space-y-8">
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="p-6 rounded-3xl bg-gradient-to-br from-indigo-900/40 to-space-800 border border-indigo-500/30 shadow-xl space-y-3">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">📚</div>
-                        <h3 class="text-lg font-bold text-white">Modul Pelajaran</h3>
-                        <p class="text-xs text-slate-300">Akses materi lengkap Bab Tata Surya Kurikulum Merdeka[cite: 6] secara terstruktur.</p>
-                        <button @click="studentMenu = 'materi'" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">Buka Materi →</button>
+            <!-- TAB 1: VISUAL 4D TATA SURYA (BACKGROUND/SIMULASI INTERAKTIF REAL) -->
+            <div x-show="activeTab === 'simulasi4d'" class="space-y-6">
+                <div class="p-6 rounded-3xl bg-space-800/80 border border-cyan-500/30 shadow-2xl space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <span class="text-xs text-cyan-400 font-semibold uppercase tracking-wider bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">Live Interactive 4D Space</span>
+                            <h3 class="text-2xl font-extrabold text-white mt-2">Peta Orbit & Simulasi Tata Surya Real-Time</h3>
+                        </div>
+                        <div class="text-xs text-slate-400 bg-space-900 px-4 py-2 rounded-xl border border-slate-800">
+                            💡 Klik planet pada kanvas atau tombol di bawah untuk melihat detail informasi ilmiah.
+                        </div>
                     </div>
-                    <div class="p-6 rounded-3xl bg-gradient-to-br from-cyan-900/40 to-space-800 border border-cyan-500/30 shadow-xl space-y-3">
-                        <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">🚀</div>
-                        <h3 class="text-lg font-bold text-white">Simulasi AR 4D Ultra</h3>
-                        <p class="text-xs text-slate-300">Jelajahi planet dengan grafik real picture interaktif 4D beresolusi tinggi.</p>
-                        <button @click="studentMenu = 'ar4d'" class="text-xs font-semibold text-cyan-400 hover:text-cyan-300">Coba Simulasi 4D →</button>
+
+                    <!-- KANVAS SIMULASI 4D TATA SURYA INTERAKTIF -->
+                    <div class="relative w-full h-[450px] bg-space-900 rounded-2xl overflow-hidden border border-slate-800 shadow-inner flex items-center justify-center">
+                        <canvas id="spaceCanvas" class="w-full h-full cursor-pointer"></canvas>
+                        <div class="absolute bottom-4 left-4 bg-space-800/90 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-700 text-xs text-cyan-300">
+                            Planet Terpilih: <strong class="text-white uppercase" x-text="selectedPlanetData.name"></strong>
+                        </div>
                     </div>
-                    <div class="p-6 rounded-3xl bg-gradient-to-br from-emerald-900/40 to-space-800 border border-emerald-500/30 shadow-xl space-y-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">⭐</div>
-                        <h3 class="text-lg font-bold text-white">Skor & Evaluasi</h3>
-                        <p class="text-xs text-slate-300">Kerjakan kuis pilihan ganda dengan sistem skor otomatis yang terhubung ke guru.</p>
-                        <button @click="studentMenu = 'kuis'" class="text-xs font-semibold text-emerald-400 hover:text-emerald-300">Mulai Kuis →</button>
+
+                    <!-- Panel Detail Planet Terpilih -->
+                    <div class="grid md:grid-cols-3 gap-6 pt-2">
+                        <div class="p-5 rounded-2xl bg-space-900 border border-slate-800 space-y-2">
+                            <h4 class="text-cyan-400 font-bold text-base" x-text="selectedPlanetData.name"></h4>
+                            <p class="text-xs text-slate-300 leading-relaxed" x-text="selectedPlanetData.desc"></p>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-space-900 border border-slate-800 space-y-2">
+                            <span class="text-xs text-slate-400 block font-semibold">Jarak dari Matahari</span>
+                            <p class="text-sm font-bold text-white" x-text="selectedPlanetData.distance"></p>
+                            <span class="text-xs text-slate-400 block font-semibold pt-1">Karakteristik Utama</span>
+                            <p class="text-xs text-cyan-300" x-text="selectedPlanetData.feature"></p>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-space-900 border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <span class="text-xs text-slate-400 block font-semibold">Status Eksplorasi</span>
+                                <p class="text-sm font-bold text-emerald-400">Telah Dikunjungi 🚀</p>
+                            </div>
+                            <button @click="activeTab = 'game'" class="w-full mt-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition shadow-md">
+                                Jelajahi di Game AR →
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Sub-Menu 2: Materi Inti -->
-            <div x-show="studentMenu === 'materi'" class="space-y-6 max-w-4xl mx-auto">
-                <div class="p-8 rounded-3xl bg-space-800/60 border border-slate-800 space-y-4 shadow-2xl">
-                    <span class="text-xs text-cyan-400 font-semibold uppercase tracking-wider">Modul 1 - Buku IPA Kelas VII</span>
-                    <h3 class="text-2xl font-bold text-white">Susunan Sistem Tata Surya</h3>
+            <!-- TAB 2: MATERI LENGKAP KURIKULUM MERDEKA -->
+            <div x-show="activeTab === 'materi'" class="space-y-6 max-w-4xl mx-auto">
+                <div class="p-8 rounded-3xl bg-space-800/80 border border-slate-800 space-y-4 shadow-2xl">
+                    <span class="text-xs text-cyan-400 font-semibold uppercase tracking-wider">Bab VII - Buku IPA Kelas VII Kurikulum Merdeka</span>
+                    <h3 class="text-2xl font-bold text-white">1. Mengenal Anggota Sistem Tata Surya</h3>
                     <p class="text-slate-300 leading-relaxed text-sm sm:text-base">
-                        Sistem Tata Surya terdiri dari Matahari sebagai pusat[cite: 6] dengan gaya gravitasi yang mengikat delapan planet, satelit, asteroid, dan komet pada garis edar (orbit) berbentuk elips.
+                        Sistem Tata Surya adalah sistem interaksi benda-benda langit yang terdiri atas Matahari sebagai pusat tata surya[cite: 6] yang dikelilingi oleh delapan planet, satelit alami, asteroid, komet, serta meteoroid akibat pengaruh gaya gravitasi matahari yang sangat besar.
                     </p>
+                    <div class="grid sm:grid-cols-2 gap-4 pt-2">
+                        <div class="p-4 rounded-2xl bg-space-900 border border-slate-800">
+                            <h4 class="font-bold text-indigo-400 mb-1">Planet Dalam (Terestrial)</h4>
+                            <p class="text-xs text-slate-400 leading-relaxed">Merkurius, Venus, Bumi, dan Mars. Letaknya dekat matahari, berukuran kecil, padat, dan tersusun dari batuan serta logam.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-space-900 border border-slate-800">
+                            <h4 class="font-bold text-cyan-400 mb-1">Planet Luar (Jovian)</h4>
+                            <p class="text-xs text-slate-400 leading-relaxed">Jupiter, Saturnus, Uranus, dan Neptunus. Letaknya jauh dari matahari, berukuran besar, dan sebagian besar terdiri atas gas serta cairan.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="p-8 rounded-3xl bg-space-800/60 border border-slate-800 space-y-4 shadow-2xl">
-                    <span class="text-xs text-cyan-400 font-semibold uppercase tracking-wider">Modul 2</span>
-                    <h3 class="text-2xl font-bold text-white">Rotasi dan Revolusi Bumi</h3>
+
+                <div class="p-8 rounded-3xl bg-space-800/80 border border-slate-800 space-y-4 shadow-2xl">
+                    <span class="text-xs text-cyan-400 font-semibold uppercase tracking-wider">Bab VII - Bagian 2</span>
+                    <h3 class="text-2xl font-bold text-white">2. Dampak Rotasi dan Revolusi Bumi</h3>
                     <ul class="list-disc list-inside space-y-2 text-slate-300 text-sm leading-relaxed">
-                        <li><strong>Rotasi Bumi:</strong> Berputarnya bumi pada porosnya selama 24 jam, menyebabkan siang-malam dan perbedaan waktu.</li>
-                        <li><strong>Revolusi Bumi:</strong> Pergerakan bumi mengelilingi matahari selama 365,25 hari, menyebabkan perubahan musim dan kalender masehi.</li>
+                        <li><strong>Rotasi Bumi (Perputaran pada porosnya selama 24 jam):</strong> Mengakibatkan terjadinya siang dan malam, gerak semu harian matahari, serta perbedaan waktu di berbagai belahan bumi.</li>
+                        <li><strong>Revolusi Bumi (Perputaran mengelilingi matahari selama 365,25 hari):</strong> Mengakibatkan gerak semu tahunan matahari, perubahan musim di bumi, serta penetapan kalender Masehi.</li>
                     </ul>
                 </div>
             </div>
 
-            <!-- Sub-Menu 3: Simulasi AR 4D Ultra Visual -->
-            <div x-show="studentMenu === 'ar4d'" class="space-y-6 max-w-5xl mx-auto" x-data="{ selectedPlanet: 'bumi' }">
-                <div class="text-center space-y-2">
-                    <span class="text-xs text-cyan-400 font-semibold uppercase tracking-wider bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/30">Simulasi AR 4D Real Picture</span>
-                    <h3 class="text-3xl font-extrabold text-white">Eksplorasi Planet 4D Ultra</h3>
-                    <p class="text-slate-400 text-sm">Klik salah satu planet di bawah untuk melihat visualisasi detail dan karakteristik ilmiahnya.</p>
-                </div>
-
-                <div class="grid lg:grid-cols-3 gap-6 items-center">
-                    <div class="space-y-3 bg-space-800/50 p-4 rounded-3xl border border-slate-800">
-                        <button @click="selectedPlanet = 'merkurius'" :class="selectedPlanet === 'merkurius' ? 'bg-cyan-600 text-white shadow-lg' : 'bg-space-900 text-slate-300 hover:bg-space-700'" class="w-full text-left p-3.5 rounded-2xl transition font-medium text-sm flex justify-between items-center">
-                            <span>1. Merkurius</span> <span class="text-xs opacity-70">Paling dekat</span>
-                        </button>
-                        <button @click="selectedPlanet = 'venus'" :class="selectedPlanet === 'venus' ? 'bg-cyan-600 text-white shadow-lg' : 'bg-space-900 text-slate-300 hover:bg-space-700'" class="w-full text-left p-3.5 rounded-2xl transition font-medium text-sm flex justify-between items-center">
-                            <span>2. Venus</span> <span class="text-xs opacity-70">Terpanas</span>
-                        </button>
-                        <button @click="selectedPlanet = 'bumi'" :class="selectedPlanet === 'bumi' ? 'bg-cyan-600 text-white shadow-lg' : 'bg-space-900 text-slate-300 hover:bg-space-700'" class="w-full text-left p-3.5 rounded-2xl transition font-medium text-sm flex justify-between items-center">
-                            <span>3. Bumi</span> <span class="text-xs opacity-70">Rumah kita</span>
-                        </button>
-                        <button @click="selectedPlanet = 'mars'" :class="selectedPlanet === 'mars' ? 'bg-cyan-600 text-white shadow-lg' : 'bg-space-900 text-slate-300 hover:bg-space-700'" class="w-full text-left p-3.5 rounded-2xl transition font-medium text-sm flex justify-between items-center">
-                            <span>4. Mars</span> <span class="text-xs opacity-70">Planet Merah</span>
-                        </button>
-                        <button @click="selectedPlanet = 'jupiter'" :class="selectedPlanet === 'jupiter' ? 'bg-cyan-600 text-white shadow-lg' : 'bg-space-900 text-slate-300 hover:bg-space-700'" class="w-full text-left p-3.5 rounded-2xl transition font-medium text-sm flex justify-between items-center">
-                            <span>5. Jupiter</span> <span class="text-xs opacity-70">Terbesar</span>
-                        </button>
+            <!-- TAB 3: GAME AR PETUALANGAN LUAR ANGKASA (INTERAKTIF & EDUKATIF) -->
+            <div x-show="activeTab === 'game'" class="max-w-4xl mx-auto space-y-6" x-data="spaceGameData()">
+                <div class="p-8 rounded-3xl bg-space-800/90 border border-emerald-500/30 shadow-2xl space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-slate-800 gap-4">
+                        <div>
+                            <span class="text-xs text-emerald-400 font-semibold uppercase tracking-wider bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Mini Game AR Interaktif</span>
+                            <h3 class="text-2xl font-extrabold text-white mt-1">Misi Penjelajah Orbit Luar Angkasa</h3>
+                        </div>
+                        <div class="flex space-x-4 text-sm font-bold bg-space-900 px-4 py-2 rounded-2xl border border-slate-800">
+                            <span>Skor: <span class="text-emerald-400" x-text="gameScore"></span></span>
+                            <span>Nyawa: <span class="text-red-400" x-text="gameLives"></span></span>
+                        </div>
                     </div>
 
-                    <div class="lg:col-span-2 bg-space-800/80 border border-cyan-500/30 p-8 rounded-3xl shadow-2xl space-y-6 text-center relative overflow-hidden">
-                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl"></div>
-                        <div class="w-48 h-48 mx-auto rounded-full planet-shadow relative flex items-center justify-center animate-pulse"
-                             :class="{
-                                'bg-gradient-to-tr from-stone-600 via-stone-400 to-stone-300': selectedPlanet === 'merkurius',
-                                'bg-gradient-to-tr from-amber-700 via-amber-500 to-yellow-200': selectedPlanet === 'venus',
-                                'bg-gradient-to-tr from-blue-700 via-cyan-500 to-emerald-400': selectedPlanet === 'bumi',
-                                'bg-gradient-to-tr from-red-800 via-red-600 to-orange-500': selectedPlanet === 'mars',
-                                'bg-gradient-to-tr from-amber-900 via-orange-600 to-amber-300': selectedPlanet === 'jupiter'
-                             }">
-                            <div class="absolute inset-0 rounded-full bg-black/20"></div>
-                            <span class="text-white font-extrabold text-lg uppercase tracking-widest drop-shadow-lg z-10" x-text="selectedPlanet"></span>
-                        </div>
+                    <!-- Layar Game -->
+                    <div class="relative w-full h-[320px] bg-space-900 rounded-2xl border border-slate-800 flex flex-col items-center justify-center p-6 text-center overflow-hidden shadow-inner">
+                        <template x-if="gameActive">
+                            <div class="space-y-4 w-full max-w-xl">
+                                <span class="text-xs text-cyan-300 font-semibold" x-text="'Misi ' + (currentMission + 1) + ' dari 3'"></span>
+                                <h4 class="text-lg font-bold text-white" x-text="missions[currentMission].question"></h4>
+                                <div class="grid grid-cols-2 gap-3 pt-2">
+                                    <template x-for="opt in missions[currentMission].options">
+                                        <button @click="answerMission(opt)" class="p-3 bg-space-800 hover:bg-indigo-600 border border-slate-700 hover:border-indigo-500 rounded-xl text-xs font-semibold text-slate-200 transition shadow" x-text="opt"></button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
 
-                        <div class="space-y-2 text-left bg-space-900/80 p-5 rounded-2xl border border-slate-800">
-                            <h4 class="text-cyan-400 font-bold capitalize text-lg" x-text="'Karakteristik ' + selectedPlanet"></h4>
-                            <p class="text-slate-300 text-sm leading-relaxed" x-text="
-                                selectedPlanet === 'merkurius' ? 'Merkurius adalah planet terkecil dan terdekat dari Matahari. Permukaannya dipenuhi kawah dengan suhu ekstrem.' :
-                                selectedPlanet === 'venus' ? 'Venus adalah planet paling panas di tata surya akibat efek rumah kaca yang sangat kuat dari atmosfer karbon dioksidanya.' :
-                                selectedPlanet === 'bumi' ? 'Bumi adalah satu-satunya planet yang diketahui memiliki kehidupan, air cair, dan atmosfer yang kaya oksigen.' :
-                                selectedPlanet === 'mars' ? 'Mars dikenal sebagai Planet Merah karena kandungan besi oksida (karat) di permukaannya. Memiliki gunung tertinggi Olympus Mons.' :
-                                'Jupiter adalah planet raksasa gas terbesar di tata surya dengan ciri khas Badai Bintik Merah Raksasa.'
-                            "></p>
-                        </div>
+                        <template x-if="!gameActive">
+                            <div class="space-y-4">
+                                <h4 class="text-2xl font-extrabold text-emerald-400" x-text="gameWon ? '🎉 Misi Penjelajahan Selesai!' : '💥 Misi Gagal, Coba Lagi!'"></h4>
+                                <p class="text-sm text-slate-300" x-text="'Skor Akhir Anda: ' + gameScore"></p>
+                                <button @click="restartGame()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition shadow-lg">Mulai Ulang Misi 🚀</button>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>
 
-            <!-- Sub-Menu 4: Kuis -->
-            <div x-show="studentMenu === 'kuis'" class="max-w-3xl mx-auto bg-space-800/60 border border-slate-800 p-8 rounded-3xl space-y-6 shadow-2xl" x-data="quizData()">
+            <!-- TAB 4: KUIS & EVALUASI SUMATIF -->
+            <div x-show="activeTab === 'kuis'" class="max-w-3xl mx-auto bg-space-800/80 border border-slate-800 p-8 rounded-3xl space-y-6 shadow-2xl" x-data="quizLogic()">
                 <div class="border-b border-slate-700 pb-4 flex justify-between items-center">
                     <div>
-                        <span class="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Evaluasi Sumatif</span>
-                        <h3 class="text-xl font-bold text-white mt-1">Kuis Interaktif Sistem Tata Surya</h3>
+                        <span class="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Evaluasi Akhir Siswa</span>
+                        <h3 class="text-xl font-bold text-white mt-1">Kuis Sumatif Sistem Tata Surya</h3>
                     </div>
-                    <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-semibold" x-text="'Soal ' + currentQuiz + ' / 2'"></span>
+                    <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-semibold" x-text="'Soal ' + qIndex + ' / 2'"></span>
                 </div>
 
-                <div x-show="currentQuiz === 1" class="space-y-4">
-                    <p class="font-semibold text-slate-100 text-lg">1. Pusat dari sistem tata surya kita adalah...</p>
+                <div x-show="qIndex === 1" class="space-y-4">
+                    <p class="font-semibold text-slate-100 text-lg">1. Planet manakah yang dikenal sebagai planet terpanas di tata surya akibat efek rumah kaca yang kuat?</p>
                     <div class="space-y-2">
-                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="q1" value="A" x-model="answer1" class="mr-3"> A. Bumi</label>
-                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="q1" value="B" x-model="answer1" class="mr-3"> B. Matahari</label>
-                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="q1" value="C" x-model="answer1" class="mr-3"> C. Bulan</label>
+                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="ans1" value="A" x-model="userAns1" class="mr-3"> A. Merkurius</label>
+                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="ans1" value="B" x-model="userAns1" class="mr-3"> B. Venus</label>
+                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="ans1" value="C" x-model="userAns1" class="mr-3"> C. Mars</label>
                     </div>
-                    <button @click="currentQuiz = 2" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl transition text-white shadow-lg">Lanjut Soal Berikutnya →</button>
+                    <button @click="qIndex = 2" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl transition text-white shadow-lg">Lanjut Soal Berikutnya →</button>
                 </div>
 
-                <div x-show="currentQuiz === 2" class="space-y-4">
-                    <p class="font-semibold text-slate-100 text-lg">2. Perputaran bumi pada porosnya disebut...</p>
+                <div x-show="qIndex === 2" class="space-y-4">
+                    <p class="font-semibold text-slate-100 text-lg">2. Pergerakan bumi mengelilingi matahari yang memakan waktu 365,25 hari disebut...</p>
                     <div class="space-y-2">
-                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="q2" value="A" x-model="answer2" class="mr-3"> A. Revolusi</label>
-                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="q2" value="B" x-model="answer2" class="mr-3"> B. Rotasi</label>
-                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="q2" value="C" x-model="answer2" class="mr-3"> C. Orbit</label>
+                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="ans2" value="A" x-model="userAns2" class="mr-3"> A. Rotasi Bumi</label>
+                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="ans2" value="B" x-model="userAns2" class="mr-3"> B. Revolusi Bumi</label>
+                        <label class="block p-3.5 rounded-xl bg-space-900 border border-slate-700 hover:border-cyan-500 cursor-pointer transition"><input type="radio" name="ans2" value="C" x-model="userAns2" class="mr-3"> C. Orbit Satelit</label>
                     </div>
-                    <button @click="submitQuiz()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl transition text-white shadow-lg shadow-emerald-600/30">Kirim Jawaban & Lihat Skor</button>
+                    <button @click="submitQuiz()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl transition text-white shadow-lg">Kirim Jawaban & Sinkronisasi Nilai</button>
                 </div>
 
-                <div x-show="quizSubmitted" class="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center space-y-3">
-                    <h4 class="text-2xl font-extrabold text-emerald-400">Kuis Selesai! 🎉</h4>
-                    <p class="text-slate-200 text-lg">Skor Akhir Anda: <strong class="text-cyan-400 text-2xl" x-text="finalScore"></strong> / 100</p>
-                    <p class="text-xs text-slate-400">Nilai Anda telah otomatis tersinkronisasi dan tercatat di dasbor guru.</p>
+                <div x-show="quizDone" class="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center space-y-3">
+                    <h4 class="text-2xl font-extrabold text-emerald-400">Evaluasi Selesai! 🎉</h4>
+                    <p class="text-slate-200 text-lg">Skor Anda: <strong class="text-cyan-400 text-2xl" x-text="finalScore"></strong> / 100</p>
+                    <p class="text-xs text-slate-400">Data nilai telah berhasil direkam secara real-time ke portal guru.</p>
                 </div>
             </div>
         </section>
@@ -303,7 +302,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 mb-8 border-b border-slate-800 gap-4">
                 <div>
                     <h2 class="text-3xl font-extrabold text-white">Dashboard Portal Guru</h2>
-                    <p class="text-sm text-slate-400">Pengajar: <strong class="text-cyan-400" x-text="userName || 'Guru Pengampu'"></strong>. Kelola rekap nilai siswa secara real-time.</p>
+                    <p class="text-sm text-slate-400">Pengajar: <strong class="text-cyan-400" x-text="userName || 'Guru Pengampu'"></strong>. Kelola rekap nilai dan modul ajar.</p>
                 </div>
                 <div class="flex gap-2 bg-space-800 p-1.5 rounded-2xl border border-slate-700 shadow-xl">
                     <button @click="teacherTab = 'rekap'" :class="teacherTab === 'rekap' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-sm font-semibold transition">Rekap Nilai Siswa</button>
@@ -313,24 +312,24 @@
 
             <div x-show="teacherTab === 'rekap'" class="space-y-6">
                 <div class="grid sm:grid-cols-3 gap-6">
-                    <div class="p-6 rounded-3xl bg-space-800/60 border border-slate-800 shadow-xl">
+                    <div class="p-6 rounded-3xl bg-space-800/80 border border-slate-800 shadow-xl">
                         <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Total Siswa Aktif</span>
                         <h4 class="text-3xl font-extrabold text-white mt-2">29 Siswa</h4>
                     </div>
-                    <div class="p-6 rounded-3xl bg-space-800/60 border border-slate-800 shadow-xl">
-                        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Rata-rata Kuis Kelas</span>
-                        <h4 class="text-3xl font-extrabold text-cyan-400 mt-2">89.4</h4>
+                    <div class="p-6 rounded-3xl bg-space-800/80 border border-slate-800 shadow-xl">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Rata-rata Kelas</span>
+                        <h4 class="text-3xl font-extrabold text-cyan-400 mt-2">91.2</h4>
                     </div>
-                    <div class="p-6 rounded-3xl bg-space-800/60 border border-slate-800 shadow-xl">
-                        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Status Sinkronisasi</span>
-                        <h4 class="text-3xl font-extrabold text-emerald-400 mt-2">Real-Time</h4>
+                    <div class="p-6 rounded-3xl bg-space-800/80 border border-slate-800 shadow-xl">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Sinkronisasi</span>
+                        <h4 class="text-3xl font-extrabold text-emerald-400 mt-2">Aktif Real-Time</h4>
                     </div>
                 </div>
 
-                <div class="bg-space-800/60 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+                <div class="bg-space-800/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
                     <div class="p-5 border-b border-slate-800 font-bold text-white flex justify-between items-center">
-                        <span>Daftar Nilai Siswa Kelas VII-A</span>
-                        <button @click="alert('Data rekap berhasil diexport ke Excel!')" class="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-xl font-semibold text-white transition">Export Excel</button>
+                        <span>Daftar Nilai Kelas VII-A</span>
+                        <button @click="alert('Data rekap nilai berhasil diexport!')" class="text-xs bg-indigo-600 hover:bg-indigo-500 px-3.5 py-2 rounded-xl font-semibold text-white transition">Export Data</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-slate-300">
@@ -338,137 +337,10 @@
                                 <tr>
                                     <th class="p-4">Nama Siswa</th>
                                     <th class="p-4">Status Modul</th>
-                                    <th class="p-4">Simulasi 4D</th>
+                                    <th class="p-4">Game Misi AR</th>
                                     <th class="p-4">Nilai Kuis</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800">
-                                <template x-for="student in studentScores">
-                                    <tr class="hover:bg-space-700/30">
-                                        <td class="p-4 font-semibold text-white" x-text="student.name"></td>
-                                        <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Selesai</span></td>
-                                        <td class="p-4 text-cyan-400">Tuntas</td>
-                                        <td class="p-4 font-bold text-emerald-400" x-text="student.score"></td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div x-show="teacherTab === 'modul'" class="space-y-6 max-w-3xl mx-auto">
-                <div class="p-8 rounded-3xl bg-space-800/60 border border-slate-800 space-y-4 shadow-2xl">
-                    <span class="text-xs text-indigo-400 font-semibold uppercase tracking-wider">Kurikulum Merdeka</span>
-                    <h3 class="text-xl font-bold text-white">Modul Ajar IPA Kelas VII Bab VII (Bumi & Tata Surya)</h3>
-                    <p class="text-slate-300 text-sm leading-relaxed">
-                        Dokumen lengkap ATP, Lembar Kerja Peserta Didik (LKPD), dan instrumen asesmen diagnostik formatif.
-                    </p>
-                    <button @click="alert('Mengunduh dokumen Modul Ajar PDF...')" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg">Unduh Modul Ajar (PDF)</button>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- MODAL LOGIN AKUN -->
-    <div x-show="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4" x-cloak>
-        <div class="bg-space-800 border border-slate-700 w-full max-w-md rounded-3xl p-8 space-y-6 shadow-2xl relative">
-            <div class="text-center space-y-2">
-                <h3 class="text-2xl font-extrabold text-white">Masuk ke Portal</h3>
-                <p class="text-xs text-slate-400">Masukkan nama lengkap dan pilih peran Anda.</p>
-            </div>
-            
-            <div class="flex bg-space-900 p-1.5 rounded-2xl border border-slate-700">
-                <button @click="loginType = 'siswa'" :class="loginType === 'siswa' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition">Siswa</button>
-                <button @click="loginType = 'guru'" :class="loginType === 'guru' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition">Guru</button>
-            </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1.5">Nama Lengkap</label>
-                    <input type="text" x-model="inputName" placeholder="Contoh: Rina Amalia" class="w-full bg-space-900 border border-slate-700 rounded-2xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-cyan-500">
-                </div>
-                <button @click="login()" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 font-bold rounded-2xl text-white transition shadow-xl shadow-indigo-600/30">Masuk Sekarang</button>
-            </div>
-            <button @click="showLoginModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm">✕</button>
-        </div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="bg-space-800/90 border-t border-slate-800 py-6 text-center text-xs text-slate-400">
-        <p>Kotak Planetarium Digital &copy; 2026. Didukung penuh untuk Pembelajaran IPA Kurikulum Merdeka[cite: 6].</p>
-    </footer>
-
-    <!-- ALPINE.JS LOGIC SCRIPT -->
-    <script>
-        function appData() {
-            return {
-                currentPortal: 'landing',
-                isLoggedIn: false,
-                userRole: '',
-                userName: '',
-                showLoginModal: false,
-                loginType: 'siswa',
-                inputName: '',
-                studentScores: [
-                    { name: 'Ahmad Fauzan', score: 90 },
-                    { name: 'Dewi Lestari', score: 95 },
-                    { name: 'Rizky Pratama', score: 85 }
-                ],
-                openPortal(role) {
-                    if(this.isLoggedIn && this.userRole === role) {
-                        this.currentPortal = role;
-                    } else {
-                        this.loginType = role;
-                        this.showLoginModal = true;
-                    }
-                },
-                login() {
-                    if(this.inputName.trim() !== '') {
-                        this.userName = this.inputName;
-                        this.userRole = this.loginType;
-                        this.isLoggedIn = true;
-                        this.showLoginModal = false;
-                        this.currentPortal = this.loginType;
-                        localStorage.setItem('planetarium_user', JSON.stringify({name: this.userName, role: this.userRole}));
-                    }
-                },
-                logout() {
-                    this.isLoggedIn = false;
-                    this.userName = '';
-                    this.userRole = '';
-                    this.currentPortal = 'landing';
-                    localStorage.removeItem('planetarium_user');
-                },
-                init() {
-                    const saved = localStorage.getItem('planetarium_user');
-                    if(saved) {
-                        const data = JSON.parse(saved);
-                        this.userName = data.name;
-                        this.userRole = data.role;
-                        this.isLoggedIn = true;
-                    }
-                }
-            }
-        }
-
-        function quizData() {
-            return {
-                currentQuiz: 1,
-                answer1: '',
-                answer2: '',
-                quizSubmitted: false,
-                finalScore: 0,
-                submitQuiz() {
-                    let score = 0;
-                    if(this.answer1 === 'B') score += 50;
-                    if(this.answer2 === 'B') score += 50;
-                    this.finalScore = score;
-                    this.quizSubmitted = true;
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+                                <tr class="hover:bg-space-700/30">
+                                    <td class="p-4 font-
