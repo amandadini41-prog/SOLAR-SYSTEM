@@ -29,7 +29,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        /* Animasi Bintang & Galaksi Ultra */
         .galaxy-bg {
             background-image: 
                 radial-gradient(white, rgba(255,255,255,0.3) 2px, transparent 3px),
@@ -92,7 +91,7 @@
     <!-- KONTEN UTAMA -->
     <main class="flex-grow">
 
-        <!-- 1. LANDING PAGE DENGAN ANIMASI TATA SURYA 3D -->
+        <!-- 1. LANDING PAGE -->
         <section x-show="currentPortal === 'landing'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6 text-center lg:text-left">
@@ -104,7 +103,7 @@
                         Eksplorasi Semesta <span class="bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-400 bg-clip-text text-transparent">Bumi & Tata Surya</span>
                     </h1>
                     <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
-                        Platform edukasi sains modern dilengkapi simulasi AR 4D Ultra Visual, materi mendalam Kurikulum Merdeka, serta dasbor evaluasi nilai interaktif[cite: 6].
+                        Platform edukasi sains modern dilengkapi simulasi AR 4D Ultra Visual, materi mendalam Kurikulum Merdeka, serta dasbor evaluasi nilai interaktif.
                     </p>
                     <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-2">
                         <button @click="openPortal('siswa')" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold transition shadow-xl shadow-indigo-600/30 flex items-center justify-center space-x-2">
@@ -145,7 +144,7 @@
             </div>
         </section>
 
-        <!-- 2. PORTAL SISWA (LANGSUNG DASHBOARD UTAMA) -->
+        <!-- 2. PORTAL SISWA -->
         <section x-show="currentPortal === 'siswa'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="{ studentMenu: 'dashboard' }">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 mb-8 border-b border-slate-800 gap-4">
                 <div>
@@ -206,7 +205,7 @@
                 </div>
             </div>
 
-            <!-- Sub-Menu 3: Simulasi AR 4D Ultra Visual (Real Picture & Interaktif) -->
+            <!-- Sub-Menu 3: Simulasi AR 4D Ultra Visual -->
             <div x-show="studentMenu === 'ar4d'" class="space-y-6 max-w-5xl mx-auto" x-data="{ selectedPlanet: 'bumi' }">
                 <div class="text-center space-y-2">
                     <span class="text-xs text-cyan-400 font-semibold uppercase tracking-wider bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/30">Simulasi AR 4D Real Picture</span>
@@ -215,7 +214,6 @@
                 </div>
 
                 <div class="grid lg:grid-cols-3 gap-6 items-center">
-                    <!-- Pilihan Planet -->
                     <div class="space-y-3 bg-space-800/50 p-4 rounded-3xl border border-slate-800">
                         <button @click="selectedPlanet = 'merkurius'" :class="selectedPlanet === 'merkurius' ? 'bg-cyan-600 text-white shadow-lg' : 'bg-space-900 text-slate-300 hover:bg-space-700'" class="w-full text-left p-3.5 rounded-2xl transition font-medium text-sm flex justify-between items-center">
                             <span>1. Merkurius</span> <span class="text-xs opacity-70">Paling dekat</span>
@@ -234,11 +232,8 @@
                         </button>
                     </div>
 
-                    <!-- Tampilan Visual AR 4D / Real Picture Graphic -->
                     <div class="lg:col-span-2 bg-space-800/80 border border-cyan-500/30 p-8 rounded-3xl shadow-2xl space-y-6 text-center relative overflow-hidden">
                         <div class="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl"></div>
-                        
-                        <!-- Visual Bola Planet 3D/4D CSS -->
                         <div class="w-48 h-48 mx-auto rounded-full planet-shadow relative flex items-center justify-center animate-pulse"
                              :class="{
                                 'bg-gradient-to-tr from-stone-600 via-stone-400 to-stone-300': selectedPlanet === 'merkurius',
@@ -265,7 +260,7 @@
                 </div>
             </div>
 
-            <!-- Sub-Menu 4: Kuis & Skor Otomatis -->
+            <!-- Sub-Menu 4: Kuis -->
             <div x-show="studentMenu === 'kuis'" class="max-w-3xl mx-auto bg-space-800/60 border border-slate-800 p-8 rounded-3xl space-y-6 shadow-2xl" x-data="quizData()">
                 <div class="border-b border-slate-700 pb-4 flex justify-between items-center">
                     <div>
@@ -275,7 +270,6 @@
                     <span class="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-semibold" x-text="'Soal ' + currentQuiz + ' / 2'"></span>
                 </div>
 
-                <!-- Soal 1 -->
                 <div x-show="currentQuiz === 1" class="space-y-4">
                     <p class="font-semibold text-slate-100 text-lg">1. Pusat dari sistem tata surya kita adalah...</p>
                     <div class="space-y-2">
@@ -286,7 +280,6 @@
                     <button @click="currentQuiz = 2" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl transition text-white shadow-lg">Lanjut Soal Berikutnya →</button>
                 </div>
 
-                <!-- Soal 2 -->
                 <div x-show="currentQuiz === 2" class="space-y-4">
                     <p class="font-semibold text-slate-100 text-lg">2. Perputaran bumi pada porosnya disebut...</p>
                     <div class="space-y-2">
@@ -297,7 +290,6 @@
                     <button @click="submitQuiz()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl transition text-white shadow-lg shadow-emerald-600/30">Kirim Jawaban & Lihat Skor</button>
                 </div>
 
-                <!-- Hasil Skor -->
                 <div x-show="quizSubmitted" class="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center space-y-3">
                     <h4 class="text-2xl font-extrabold text-emerald-400">Kuis Selesai! 🎉</h4>
                     <p class="text-slate-200 text-lg">Skor Akhir Anda: <strong class="text-cyan-400 text-2xl" x-text="finalScore"></strong> / 100</p>
@@ -319,7 +311,6 @@
                 </div>
             </div>
 
-            <!-- Tab Rekap Nilai -->
             <div x-show="teacherTab === 'rekap'" class="space-y-6">
                 <div class="grid sm:grid-cols-3 gap-6">
                     <div class="p-6 rounded-3xl bg-space-800/60 border border-slate-800 shadow-xl">
@@ -336,7 +327,6 @@
                     </div>
                 </div>
 
-                <!-- Tabel Rekap -->
                 <div class="bg-space-800/60 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
                     <div class="p-5 border-b border-slate-800 font-bold text-white flex justify-between items-center">
                         <span>Daftar Nilai Siswa Kelas VII-A</span>
@@ -367,7 +357,6 @@
                 </div>
             </div>
 
-            <!-- Tab Modul Ajar -->
             <div x-show="teacherTab === 'modul'" class="space-y-6 max-w-3xl mx-auto">
                 <div class="p-8 rounded-3xl bg-space-800/60 border border-slate-800 space-y-4 shadow-2xl">
                     <span class="text-xs text-indigo-400 font-semibold uppercase tracking-wider">Kurikulum Merdeka</span>
@@ -405,3 +394,81 @@
             <button @click="showLoginModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm">✕</button>
         </div>
     </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-space-800/90 border-t border-slate-800 py-6 text-center text-xs text-slate-400">
+        <p>Kotak Planetarium Digital &copy; 2026. Didukung penuh untuk Pembelajaran IPA Kurikulum Merdeka[cite: 6].</p>
+    </footer>
+
+    <!-- ALPINE.JS LOGIC SCRIPT -->
+    <script>
+        function appData() {
+            return {
+                currentPortal: 'landing',
+                isLoggedIn: false,
+                userRole: '',
+                userName: '',
+                showLoginModal: false,
+                loginType: 'siswa',
+                inputName: '',
+                studentScores: [
+                    { name: 'Ahmad Fauzan', score: 90 },
+                    { name: 'Dewi Lestari', score: 95 },
+                    { name: 'Rizky Pratama', score: 85 }
+                ],
+                openPortal(role) {
+                    if(this.isLoggedIn && this.userRole === role) {
+                        this.currentPortal = role;
+                    } else {
+                        this.loginType = role;
+                        this.showLoginModal = true;
+                    }
+                },
+                login() {
+                    if(this.inputName.trim() !== '') {
+                        this.userName = this.inputName;
+                        this.userRole = this.loginType;
+                        this.isLoggedIn = true;
+                        this.showLoginModal = false;
+                        this.currentPortal = this.loginType;
+                        localStorage.setItem('planetarium_user', JSON.stringify({name: this.userName, role: this.userRole}));
+                    }
+                },
+                logout() {
+                    this.isLoggedIn = false;
+                    this.userName = '';
+                    this.userRole = '';
+                    this.currentPortal = 'landing';
+                    localStorage.removeItem('planetarium_user');
+                },
+                init() {
+                    const saved = localStorage.getItem('planetarium_user');
+                    if(saved) {
+                        const data = JSON.parse(saved);
+                        this.userName = data.name;
+                        this.userRole = data.role;
+                        this.isLoggedIn = true;
+                    }
+                }
+            }
+        }
+
+        function quizData() {
+            return {
+                currentQuiz: 1,
+                answer1: '',
+                answer2: '',
+                quizSubmitted: false,
+                finalScore: 0,
+                submitQuiz() {
+                    let score = 0;
+                    if(this.answer1 === 'B') score += 50;
+                    if(this.answer2 === 'B') score += 50;
+                    this.finalScore = score;
+                    this.quizSubmitted = true;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
