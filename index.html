@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astrophere - AR Tata Surya Explorer</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<style>
+  * { font-family: 'Segoe UI', Tahoma, sans-serif; }
+  
+  /* ==== BACKGROUND BIRU DARK SPARK ==== */
+  body { 
+    background: #020617;
+    background-image: 
+      radial-gradient(ellipse at 20% 0%, rgba(30, 64, 175, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(14, 116, 144, 0.35) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(15, 23, 42, 1) 0%, rgba(2, 6, 23, 1) 100%);
+    background-attachment: fixed;
+    color: #e2e8f0; 
+    overflow-x: hidden; 
+  }
+
+  /* ==== BINTANG BERKILAU ==== */
+  .stars {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  }
+  .stars::before, .stars::after {
+    content: ''; position: absolute; width: 2px; height: 2px;
+    background: #93c5fd; border-radius: 50%;
+    box-shadow: 
+      50px 100px #bfdbfe, 150px 250px #93c5fd, 300px 80px #dbeafe, 450px 400px #60a5fa,
+      600px 150px #bfdbfe, 750px 300px #93c5fd, 900px 200px #fff, 1100px 350px #60a5fa,
+      200px 500px #93c5fd, 500px 600px #dbeafe, 800px 550px #fff, 1000px 700px #60a5fa,
+      80px 700px #bfdbfe, 350px 800px #93c5fd, 700px 900px #dbeafe, 1200px 100px #60a5fa,
+      1300px 500px #93c5fd, 1400px 800px #fff, 100px 950px #bfdbfe, 900px 1000px #60a5fa,
+      400px 1100px #93c5fd, 1100px 1150px #dbeafe, 600px 1000px #fff, 200px 300px #60a5fa;
+    animation: twinkle 4s infinite alternate;
+  }
+  .stars::after { 
+    animation-delay: 2s; 
+    opacity: 0.6;
+    box-shadow: 
+      100px 200px #fff, 400px 150px #93c5fd, 800px 400px #bfdbfe,
+      1200px 300px #fff, 250px 600px #60a5fa, 650px 800px #93c5fd,
+      1050px 950px #dbeafe, 1500px 200px #fff, 1350px 650px #bfdbfe,
+      500px 1200px #93c5fd, 1000px 1300px #60a5fa;
+  }
+  @keyframes twinkle { 0%{opacity:0.3; transform:scale(1);} 100%{opacity:1; transform:scale(1.2);} }
+
+  /* ==== SPARKLE BIRU MELAYANG ==== */
+  .sparkle {
+    position: fixed;
+    width: 4px; height: 4px;
+    background: #38bdf8;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #38bdf8, 0 0 20px #0ea5e9;
+    z-index: -1;
+    animation: floatSpark 8s infinite ease-in-out;
+  }
+  .sparkle:nth-child(1) { top: 10%; left: 15%; animation-delay: 0s; }
+  .sparkle:nth-child(2) { top: 30%; left: 80%; animation-delay: 1s; }
+  .sparkle:nth-child(3) { top: 60%; left: 25%; animation-delay: 2s; }
+  .sparkle:nth-child(4) { top: 80%; left: 70%; animation-delay: 3s; }
+  .sparkle:nth-child(5) { top: 45%; left: 50%; animation-delay: 4s; }
+  .sparkle:nth-child(6) { top: 15%; left: 60%; animation-delay: 5s; }
+  .sparkle:nth-child(7) { top: 70%; left: 10%; animation-delay: 6s; }
+  .sparkle:nth-child(8) { top: 25%; left: 40%; animation-delay: 7s; }
+  @keyframes floatSpark {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
+    50% { transform: translateY(-40px) scale(1.8); opacity: 1; }
+  }
+
+  /* ==== NAVBAR ==== */
+  .nav-link { transition: all 0.3s; position: relative; }
+  .nav-link:hover { color: #22d3ee; }
+  .nav-link.active { color: #22d3ee; }
+  .nav-link.active::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 100%; height: 2px; background: #22d3ee;
+    box-shadow: 0 0 8px #22d3ee;
+  }
+  .nav-link:hover::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 100%; height: 2px; background: #22d3ee;
+  }
+
+  /* ==== HALAMAN ==== */
+  .page { display: none; animation: fadeIn 0.5s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ==== GLOW ==== */
+  .glow-cyan { box-shadow: 0 0 20px rgba(34,211,238,0.5); }
+  .text-glow { text-shadow: 0 0 30px rgba(56,189,248,0.9), 0 0 60px rgba(34,211,238,0.5); }
+
+  /* ==== PLANET IKON UNIK ==== */
+  .planet-icon {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    position: relative;
+    transition: transform 0.5s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    overflow: visible;
+  }
+  .planet-icon:hover { transform: scale(1.15) rotate(8deg); }
+  
+  /* Merkurius - berbatu abu-abu */
+  .planet-icon.merkurius {
+    background: radial-gradient(circle at 30% 30%, #d4d4d8, #71717a 50%, #3f3f46 100%);
+    box-shadow: inset -8px -8px 20px rgba(0,0,0,0.6), 0 0 20px rgba(161,161,170,0.5);
+  }
+  /* Venus - kuning keemasan dengan glow */
+  .planet-icon.venus {
+    background: radial-gradient(circle at 30% 30%, #fef3c7, #fbbf24 50%, #b45309 100%);
+    box-shadow: inset -8px -8px 20px rgba(120,53,15,0.6), 0 0 25px rgba(251,191,36,0.7);
+  }
+  /* Bumi - biru hijau dengan awan */
+  .planet-icon.bumi {
+    background: 
+      radial-gradient(circle at 70% 20%, rgba(255,255,255,0.8) 0%, transparent 15%),
+      radial-gradient(circle at 30% 60%, rgba(255,255,255,0.6) 0%, transparent 10%),
+      radial-gradient(circle at 30% 30%, #60a5fa, #2563eb 40%, #059669 70%, #064e3b 100%);
+    box-shadow: inset -8px -8px 20px rgba(0,0,0,0.5), 0 0 25px rgba(59,130,246,0.8);
+  }
+  /* Mars - merah berbatu dengan kawah */
+  .planet-icon.mars {
+    background: 
+      radial-gradient(circle at 60% 30%, rgba(0,0,0,0.3) 0%, transparent 12%),
+      radial-gradient(circle at 35% 65%, rgba(0,0,0,0.25) 0%, transparent 8%),
+      radial-gradient(circle at 30% 30%, #fca5a5, #ef4444 45%, #7f1d1d 100%);
+    box-shadow: inset -8px -8px 20px rgba(0,0,0,0.6), 0 0 25px rgba(239,68,68,0.7);
+  }
+  /* Jupiter - bergaris dengan Bintik Merah */
+  .planet-icon.jupiter {
+    background: 
+      radial-gradient(circle at 65% 60%, rgba(180,30,20,0.95) 0%, rgba(180,30,20,0.95) 12%, transparent 13%),
+      repeating-linear-gradient(90deg, 
+        #fbbf24 0%, #f59e0b 15%, #d97706 25%, #fbbf24 35%, 
+        #b45309 50%, #d97706 65%, #f59e0b 80%, #fbbf24 100%);
+    box-shadow: inset -10px -10px 25px rgba(0,0,0,0.6), 0 0 25px rgba(245,158,11,0.7);
+  }
+  /* Saturnus - dengan CINCIN */
+  .planet-icon.saturnus {
+    background: radial-gradient(circle at 30% 30%, #fef3c7, #fcd34d 50%, #b45309 100%);
+    box-shadow: inset -8px -8px 18px rgba(120,53,15,0.6), 0 0 25px rgba(252,211,77,0.8);
+  }
+  .planet-icon.saturnus::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-20deg);
+    width: 140%; height: 30%;
+    border: 4px solid rgba(252,211,77,0.9);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(252,211,77,0.7), inset 0 0 10px rgba(252,211,77,0.5);
+    pointer-events: none;
+  }
+  .planet-icon.saturnus::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-20deg);
+    width: 175%; height: 45%;
+    border: 2px solid rgba(252,211,77,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  /* Uranus - biru pucat dengan cincin vertikal */
+  .planet-icon.uranus {
+    background: radial-gradient(circle at 30% 30%, #cffafe, #22d3ee 50%, #0e7490 100%);
+    box-shadow: inset -8px -8px 20px rgba(0,0,0,0.4), 0 0 25px rgba(34,211,238,0.8);
+  }
+  .planet-icon.uranus::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(80deg);
+    width: 130%; height: 25%;
+    border: 2px solid rgba(207,250,254,0.7);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  /* Neptunus - biru tua dengan atmosfer */
+  .planet-icon.neptunus {
+    background: radial-gradient(circle at 30% 30%, #93c5fd, #2563eb 50%, #1e3a8a 100%);
+    box-shadow: inset -8px -8px 20px rgba(0,0,0,0.6), 0 0 25px rgba(37,99,235,0.9);
+  }
+  .planet-icon.neptunus::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: radial-gradient(circle, transparent 60%, rgba(147,197,253,0.3) 100%);
+    animation: pulseNeptune 3s infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes pulseNeptune {
+    0% { box-shadow: 0 0 10px rgba(37,99,235,0.5); }
+    100% { box-shadow: 0 0 30px rgba(37,99,235,0.9); }
+  }
+
+  /* ==== CARD HOVER ==== */
+  .card-hover { transition: all 0.3s; }
+  .card-hover:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(56,189,248,0.35); }
+
+  /* ==== KUIS ==== */
+  .quiz-option { transition: all 0.2s; cursor: pointer; }
+  .quiz-option:hover { background: rgba(34,211,238,0.15); border-color: #22d3ee; }
+  .quiz-option.correct { background: rgba(34,197,94,0.3); border-color: #22c55e; }
+  .quiz-option.wrong { background: rgba(239,68,68,0.3); border-color: #ef4444; }
+
+  /* ==== MOBILE MENU ==== */
+  #mobileMenu { transition: max-height 0.4s ease; max-height: 0; overflow: hidden; }
+  #mobileMenu.open { max-height: 500px; }
+
+  /* ==== SCROLLBAR ==== */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0a0e27; }
+  ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ==== BACKGROUND EFEK ==== -->
+<div class="stars"></div>
+<div class="sparkle"></div>
+<div class="sparkle"></div>
+<div class="sparkle"></div>
+<div class="sparkle"></div>
+<div class="sparkle"></div>
+<div class="sparkle"></div>
+<div class="sparkle"></div>
+<div class="sparkle"></div>
+
+<!-- ===================== NAVBAR ===================== -->
+<nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-[#0b1229]/80 border-b border-cyan-500/20">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="showPage('home')">
+      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-700 glow-cyan flex items-center justify-center text-lg">🪐</div>
+      <span class="font-bold text-lg text-cyan-400">Astrophere</span>
+    </div>
+    <div class="hidden md:flex items-center gap-6 text-sm">
+      <a class="nav-link cursor-pointer active" data-page="home" onclick="showPage('home')">Home</a>
+      <a class="nav-link cursor-pointer" data-page="panduan" onclick="showPage('panduan')">Panduan</a>
+      <a class="nav-link cursor-pointer" data-page="ar" onclick="showPage('ar')">AR</a>
+      <a class="nav-link cursor-pointer" data-page="materi" onclick="showPage('materi')">Materi</a>
+      <a class="nav-link cursor-pointer" data-page="kuis" onclick="showPage('kuis')">Kuis</a>
+      <a class="nav-link cursor-pointer" data-page="galeri" onclick="showPage('galeri')">Galeri</a>
+      <a class="nav-link cursor-pointer" data-page="tentang" onclick="showPage('tentang')">Tentang</a>
+    </div>
+    <button class="md:hidden text-cyan-400 text-2xl" onclick="toggleMenu()">☰</button>
+  </div>
+  <div id="mobileMenu" class="md:hidden bg-[#0b1229]/95">
+    <div class="px-4 py-2 flex flex-col gap-3 text-sm">
+      <a class="cursor-pointer py-2" onclick="showPage('home');toggleMenu()">🏠 Home</a>
+      <a class="cursor-pointer py-2" onclick="showPage('panduan');toggleMenu()">📘 Panduan</a>
+      <a class="cursor-pointer py-2" onclick="showPage('ar');toggleMenu()">📷 AR Viewer</a>
+      <a class="cursor-pointer py-2" onclick="showPage('materi');toggleMenu()">📖 Materi</a>
+      <a class="cursor-pointer py-2" onclick="showPage('kuis');toggleMenu()">🧠 Kuis</a>
+      <a class="cursor-pointer py-2" onclick="showPage('galeri');toggleMenu()">🎴 Galeri</a>
+      <a class="cursor-pointer py-2" onclick="showPage('tentang');toggleMenu()">ℹ️ Tentang</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== HALAMAN: HOME ===================== -->
+<section id="page-home" class="page active pt-24 pb-16 px-4">
+  <div class="max-w-6xl mx-auto text-center py-12">
+    <div class="inline-block px-4 py-1 rounded-full border border-cyan-500/40 text-cyan-300 text-xs mb-6 backdrop-blur-sm bg-blue-500/5">
+      🚀 Media Pembelajaran IPA Kelas 7 SMP
+    </div>
+    <h1 class="text-4xl md:text-6xl font-bold mb-4 text-glow">
+      Jelajahi <span class="text-cyan-400">Tata Surya</span><br>di <span class="text-blue-400">Astrophere</span>
+    </h1>
+    <p class="text-slate-300 max-w-2xl mx-auto mb-8">
+      Belajar tata surya jadi lebih seru dengan Augmented Reality. 
+      Scan kartu marker, dan lihat planet-planet 3D muncul di depan matamu!
+    </p>
+    <div class="flex flex-wrap gap-4 justify-center">
+      <button onclick="showPage('ar')" class="px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold glow-cyan hover:scale-105 transition">
+        🚀 Mulai AR
+      </button>
+      <button onclick="showPage('materi')" class="px-8 py-3 rounded-full border-2 border-orange-400 text-orange-300 font-semibold hover:bg-orange-400/10 transition">
+        📖 Baca Materi
+      </button>
+    </div>
+  </div>
+
+  <!-- Fitur -->
+  <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-6 mt-12">
+    <div class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 card-hover">
+      <div class="text-4xl mb-3">📷</div>
+      <h3 class="text-xl font-bold text-cyan-400 mb-2">AR Interaktif</h3>
+      <p class="text-slate-300 text-sm">Lihat planet 3D muncul dari kartu marker dengan teknologi WebAR tanpa install aplikasi.</p>
+    </div>
+    <div class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-orange-500/20 card-hover">
+      <div class="text-4xl mb-3">📖</div>
+      <h3 class="text-xl font-bold text-orange-400 mb-2">Materi Lengkap</h3>
+      <p class="text-slate-300 text-sm">Penjelasan lengkap 8 planet, matahari, asteroid, komet, dan satelit sesuai kurikulum SMP.</p>
+    </div>
+    <div class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-purple-500/20 card-hover">
+      <div class="text-4xl mb-3">🧠</div>
+      <h3 class="text-xl font-bold text-purple-400 mb-2">Kuis Seru</h3>
+      <p class="text-slate-300 text-sm">Uji pemahamanmu dengan 10 soal interaktif dan dapatkan predikat bintang!</p>
+    </div>
+  </div>
+
+  <!-- Preview Planet -->
+  <div class="max-w-6xl mx-auto mt-20">
+    <h2 class="text-3xl font-bold text-center mb-4">🌌 8 Planet Tata Surya</h2>
+    <p class="text-center text-slate-400 mb-10">Klik planet untuk melihat detail</p>
+    <div id="planetPreview" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+  </div>
+
+  <!-- Cara Pakai -->
+  <div class="max-w-6xl mx-auto mt-20">
+    <h2 class="text-3xl font-bold text-center mb-10">Cara Pakai</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="text-center p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/10">
+        <div class="text-5xl mb-3">1️⃣</div>
+        <h3 class="font-bold text-cyan-400 mb-2">Buka Website</h3>
+        <p class="text-sm text-slate-300">Akses lewat browser HP kamu</p>
+      </div>
+      <div class="text-center p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/10">
+        <div class="text-5xl mb-3">2️⃣</div>
+        <h3 class="font-bold text-cyan-400 mb-2">Scan Marker</h3>
+        <p class="text-sm text-slate-300">Arahkan kamera ke kartu planet</p>
+      </div>
+      <div class="text-center p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/10">
+        <div class="text-5xl mb-3">3️⃣</div>
+        <h3 class="font-bold text-cyan-400 mb-2">Jelajah!</h3>
+        <p class="text-sm text-slate-300">Putar, zoom, dan pelajari planet</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HALAMAN: PANDUAN ===================== -->
+<section id="page-panduan" class="page pt-24 pb-16 px-4">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-4 text-cyan-400">📘 Panduan Penggunaan</h1>
+    <p class="text-center text-slate-400 mb-12">Ikuti langkah-langkah berikut untuk memulai petualangan AR</p>
+
+    <div class="space-y-6">
+      <div class="flex gap-4 p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 card-hover">
+        <div class="text-4xl">📱</div>
+        <div>
+          <h3 class="font-bold text-lg text-cyan-400 mb-1">Langkah 1: Siapkan Perangkat</h3>
+          <p class="text-slate-300 text-sm">Gunakan HP dengan kamera & koneksi internet stabil. Browser yang disarankan: Chrome (Android) atau Safari (iOS).</p>
+        </div>
+      </div>
+
+      <div class="flex gap-4 p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 card-hover">
+        <div class="text-4xl">🎴</div>
+        <div>
+          <h3 class="font-bold text-lg text-cyan-400 mb-1">Langkah 2: Download Marker</h3>
+          <p class="text-slate-300 text-sm">Buka halaman <span class="text-cyan-300 cursor-pointer underline" onclick="showPage('galeri')">Galeri</span>, download dan print kartu marker planet.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-4 p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 card-hover">
+        <div class="text-4xl">📷</div>
+        <div>
+          <h3 class="font-bold text-lg text-cyan-400 mb-1">Langkah 3: Buka AR Viewer</h3>
+          <p class="text-slate-300 text-sm">Klik menu <span class="text-cyan-300 cursor-pointer underline" onclick="showPage('ar')">AR</span> dan izinkan akses kamera saat diminta.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-4 p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 card-hover">
+        <div class="text-4xl">🎯</div>
+        <div>
+          <h3 class="font-bold text-lg text-cyan-400 mb-1">Langkah 4: Scan Marker</h3>
+          <p class="text-slate-300 text-sm">Arahkan kamera ke kartu marker dengan pencahayaan cukup. Planet 3D akan muncul otomatis.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-4 p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 card-hover">
+        <div class="text-4xl">🖐️</div>
+        <div>
+          <h3 class="font-bold text-lg text-cyan-400 mb-1">Langkah 5: Interaksi</h3>
+          <p class="text-slate-300 text-sm">Tap planet untuk info, geser untuk memutar, dan pinch untuk zoom. Selamat menjelajah!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 p-6 rounded-2xl bg-orange-500/10 backdrop-blur-sm border border-orange-500/30">
+      <h3 class="font-bold text-orange-400 mb-3">💡 Tips & Troubleshooting</h3>
+      <ul class="text-sm text-slate-300 space-y-2 list-disc list-inside">
+        <li>Pastikan pencahayaan cukup terang saat scan marker</li>
+        <li>Jika kamera tidak muncul, refresh halaman dan izinkan akses kamera</li>
+        <li>Jangan lipat atau basahi kartu marker</li>
+        <li>Gunakan browser terbaru untuk hasil optimal</li>
+      </ul>
+    </div>
+
+    <div class="mt-10">
+      <h3 class="font-bold text-cyan-400 mb-4 text-center">🎬 Video Tutorial</h3>
+      <div class="aspect-video rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 flex items-center justify-center">
+        <div class="text-center">
+          <div class="text-6xl mb-2">▶️</div>
+          <p class="text-slate-400 text-sm">Video tutorial akan ditampilkan di sini</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HALAMAN: AR VIEWER ===================== -->
+<section id="page-ar" class="page pt-24 pb-16 px-4">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-4 text-cyan-400">📷 AR Viewer</h1>
+    <p class="text-center text-slate-400 mb-8">Pilih planet lalu arahkan kamera ke marker</p>
+
+    <div id="planetButtons" class="flex flex-wrap gap-2 justify-center mb-6"></div>
+
+    <div class="relative rounded-2xl overflow-hidden border-2 border-cyan-500/40 glow-cyan bg-black" style="min-height: 400px;">
+      <model-viewer id="arViewer"
+        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+        alt="Model 3D Planet"
+        camera-controls
+        auto-rotate
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        shadow-intensity="1"
+        style="width:100%; height:500px; background: radial-gradient(ellipse at center, #0b1229 0%, #000 100%);">
+        <button slot="ar-button" class="absolute bottom-4 right-4 px-6 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold glow-cyan">
+          🚀 Lihat di AR
+        </button>
+        <div class="absolute top-4 left-4 px-4 py-2 rounded-full bg-black/60 text-cyan-300 text-sm" id="viewerLabel">
+          👨‍🚀 Astronaut (Demo)
+        </div>
+      </model-viewer>
+    </div>
+
+    <div id="planetInfo" class="mt-6 p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 hidden">
+      <h3 id="infoName" class="text-2xl font-bold text-cyan-400 mb-3"></h3>
+      <div class="grid md:grid-cols-2 gap-4 text-sm">
+        <div><span class="text-slate-400">Diameter:</span> <span id="infoDiameter" class="text-white"></span></div>
+        <div><span class="text-slate-400">Jarak dari Matahari:</span> <span id="infoDistance" class="text-white"></span></div>
+        <div><span class="text-slate-400">Periode Rotasi:</span> <span id="infoRotation" class="text-white"></span></div>
+        <div><span class="text-slate-400">Periode Revolusi:</span> <span id="infoRevolution" class="text-white"></span></div>
+      </div>
+      <div class="mt-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
+        <p class="text-sm"><span class="text-orange-400 font-semibold">✨ Fakta Unik:</span> <span id="infoFact" class="text-slate-200"></span></p>
+      </div>
+    </div>
+
+    <div class="mt-6 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-sm text-slate-300">
+      ℹ️ <strong>Catatan:</strong> Karena keterbatasan aset model 3D gratis, viewer ini menampilkan model demo Astronaut. 
+      Untuk produksi nyata, ganti <code class="text-cyan-300">src</code> pada tag <code>&lt;model-viewer&gt;</code> dengan file <code>.glb</code> planet yang kamu miliki.
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HALAMAN: MATERI ===================== -->
+<section id="page-materi" class="page pt-24 pb-16 px-4">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-4 text-cyan-400">📖 Materi Tata Surya</h1>
+    <p class="text-center text-slate-400 mb-12">Ringkasan lengkap untuk siswa SMP Kelas 7</p>
+
+    <div class="grid md:grid-cols-4 gap-8">
+      <aside class="md:col-span-1">
+        <div class="sticky top-24 p-4 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20">
+          <h3 class="font-bold text-cyan-400 mb-3 text-sm">📌 Daftar Isi</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#m-definisi" class="text-slate-300 hover:text-cyan-400">Pengertian</a></li>
+            <li><a href="#m-matahari" class="text-slate-300 hover:text-cyan-400">Matahari</a></li>
+            <li><a href="#m-planet" class="text-slate-300 hover:text-cyan-400">8 Planet</a></li>
+            <li><a href="#m-asteroid" class="text-slate-300 hover:text-cyan-400">Asteroid</a></li>
+            <li><a href="#m-komet" class="text-slate-300 hover:text-cyan-400">Komet</a></li>
+            <li><a href="#m-satelit" class="text-slate-300 hover:text-cyan-400">Satelit</a></li>
+            <li><a href="#m-rotasi" class="text-slate-300 hover:text-cyan-400">Rotasi & Revolusi</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <main class="md:col-span-3 space-y-10">
+        <div id="m-definisi" class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20">
+          <h2 class="text-2xl font-bold text-cyan-400 mb-3">🌌 Pengertian Tata Surya</h2>
+          <p class="text-slate-300 leading-relaxed">
+            Tata Surya adalah kumpulan benda langit yang terdiri dari Matahari sebagai pusatnya, 
+            serta semua objek yang terikat oleh gravitasinya. Objek-objek tersebut meliputi 
+            8 planet, satelit alami, planet kerdil, asteroid, komet, dan meteoroid.
+          </p>
+        </div>
+
+        <div id="m-matahari" class="p-6 rounded-2xl bg-gradient-to-br from-orange-500/15 to-yellow-500/10 backdrop-blur-sm border border-orange-500/30">
+          <h2 class="text-2xl font-bold text-orange-400 mb-3">☀️ Matahari</h2>
+          <p class="text-slate-300 leading-relaxed mb-3">
+            Matahari adalah bintang di pusat Tata Surya. Tersusun dari gas hidrogen (74%) dan helium (25%). 
+            Suhu permukaannya sekitar 5.500°C dan suhunya di inti mencapai 15 juta°C.
+          </p>
+          <ul class="text-sm text-slate-300 space-y-1 list-disc list-inside">
+            <li>Diameter: ± 1.392.000 km (109x Bumi)</li>
+            <li>Jarak ke Bumi: ± 149,6 juta km (1 SA)</li>
+            <li>Sumber energi utama bagi kehidupan di Bumi</li>
+          </ul>
+        </div>
+
+        <div id="m-planet">
+          <h2 class="text-2xl font-bold text-cyan-400 mb-6">🪐 8 Planet Tata Surya</h2>
+          <div id="materiPlanet" class="grid md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <div id="m-asteroid" class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-purple-500/20">
+          <h2 class="text-2xl font-bold text-purple-400 mb-3">🪨 Asteroid</h2>
+          <p class="text-slate-300">Benda langit berbatu yang mengorbit Matahari. Sebagian besar terletak di sabuk asteroid antara Mars dan Jupiter.</p>
+        </div>
+
+        <div id="m-komet" class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20">
+          <h2 class="text-2xl font-bold text-cyan-400 mb-3">☄️ Komet</h2>
+          <p class="text-slate-300">Benda langit dari es, debu, dan gas. Saat mendekati Matahari, komet membentuk ekor yang indah. Contoh: Komet Halley.</p>
+        </div>
+
+        <div id="m-satelit" class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-blue-500/20">
+          <h2 class="text-2xl font-bold text-blue-400 mb-3">🌙 Satelit</h2>
+          <p class="text-slate-300">Benda langit yang mengelilingi planet. Contoh: Bulan (satelit Bumi), Titan (satelit Saturnus), Europa (satelit Jupiter).</p>
+        </div>
+
+        <div id="m-rotasi" class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-emerald-500/20">
+          <h2 class="text-2xl font-bold text-emerald-400 mb-3">🔄 Rotasi & Revolusi</h2>
+          <ul class="text-slate-300 space-y-2 list-disc list-inside">
+            <li><strong>Rotasi:</strong> perputaran planet pada porosnya → menyebabkan siang-malam. Bumi: 24 jam.</li>
+            <li><strong>Revolusi:</strong> perputaran planet mengelilingi Matahari → menyebabkan perubahan musim. Bumi: 365¼ hari.</li>
+          </ul>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30">
+          <h3 class="font-bold text-orange-400 mb-2">💡 Tahukah Kamu?</h3>
+          <p class="text-sm text-slate-300">Satu hari di Venus lebih lama daripada satu tahunnya! Venus butuh 243 hari Bumi untuk sekali rotasi, tapi hanya 225 hari untuk sekali revolusi.</p>
+        </div>
+
+        <div class="text-center pt-6">
+          <button onclick="showPage('kuis')" class="px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold glow-cyan hover:scale-105 transition">
+            🧠 Lanjut ke Kuis
+          </button>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HALAMAN: KUIS ===================== -->
+<section id="page-kuis" class="page pt-24 pb-16 px-4">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-4 text-cyan-400">🧠 Kuis Tata Surya</h1>
+    <p class="text-center text-slate-400 mb-8">Jawab 10 soal berikut untuk menguji pemahamanmu</p>
+
+    <div id="quizStart" class="text-center p-10 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20">
+      <div class="text-6xl mb-4">🚀</div>
+      <h2 class="text-2xl font-bold mb-2">Siap Memulai?</h2>
+      <p class="text-slate-400 mb-6">10 soal pilihan ganda tentang tata surya</p>
+      <button onclick="startQuiz()" class="px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold glow-cyan hover:scale-105 transition">
+        Mulai Kuis
+      </button>
+    </div>
+
+    <div id="quizPlay" class="hidden">
+      <div class="flex justify-between items-center mb-4 text-sm">
+        <span class="text-cyan-400 font-semibold" id="quizProgress">Soal 1 dari 10</span>
+        <span class="text-orange-400 font-semibold">Skor: <span id="quizScore">0</span></span>
+      </div>
+      <div class="w-full h-2 bg-white/10 rounded-full mb-6 overflow-hidden">
+        <div id="quizBar" class="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all" style="width:0%"></div>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20">
+        <h2 id="quizQuestion" class="text-lg md:text-xl font-bold mb-6"></h2>
+        <div id="quizOptions" class="space-y-3"></div>
+        <div id="quizFeedback" class="mt-4 hidden p-3 rounded-lg text-sm"></div>
+        <div class="mt-6 text-right">
+          <button id="quizNext" onclick="nextQuestion()" class="hidden px-6 py-2 rounded-full bg-cyan-500 text-black font-semibold hover:bg-cyan-400">
+            Soal Berikutnya →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="quizResult" class="hidden text-center p-10 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20">
+      <div id="resultIcon" class="text-6xl mb-4">🏆</div>
+      <h2 class="text-3xl font-bold text-cyan-400 mb-2">Kuis Selesai!</h2>
+      <p class="text-lg mb-2">Skor Kamu: <span id="finalScore" class="font-bold text-orange-400"></span> / 100</p>
+      <p id="resultPredicate" class="text-xl font-bold mb-6"></p>
+      <div class="flex gap-3 justify-center flex-wrap">
+        <button onclick="startQuiz()" class="px-6 py-2 rounded-full bg-cyan-500 text-black font-semibold hover:bg-cyan-400">🔄 Ulangi</button>
+        <button onclick="showPage('materi')" class="px-6 py-2 rounded-full border border-cyan-500 text-cyan-300 hover:bg-cyan-500/10">📖 Ke Materi</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HALAMAN: GALERI ===================== -->
+<section id="page-galeri" class="page pt-24 pb-16 px-4">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-4 text-cyan-400">🎴 Galeri Marker AR</h1>
+    <p class="text-center text-slate-400 mb-4">Download & print kartu marker untuk digunakan di AR Viewer</p>
+
+    <div class="text-center mb-8">
+      <button onclick="downloadAll()" class="px-6 py-2 rounded-full bg-orange-500 text-black font-semibold hover:bg-orange-400">📦 Download Semua</button>
+    </div>
+
+    <div id="markerGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+
+    <div class="mt-10 p-6 rounded-2xl bg-cyan-500/10 backdrop-blur-sm border border-cyan-500/30 text-sm">
+      <h3 class="font-bold text-cyan-400 mb-2">🖨️ Panduan Cetak</h3>
+      <ul class="text-slate-300 space-y-1 list-disc list-inside">
+        <li>Cetak pada kertas tebal ukuran A5 atau A4 (1 kartu per halaman)</li>
+        <li>Jangan melipat atau merusak pola marker</li>
+        <li>Gunakan pencahayaan cukup saat scan</li>
+        <li>Rekomendasi: laminating agar tahan lama</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HALAMAN: TENTANG ===================== -->
+<section id="page-tentang" class="page pt-24 pb-16 px-4">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-4 text-cyan-400">ℹ️ Tentang</h1>
+    <p class="text-center text-slate-400 mb-12">Astrophere - AR Tata Surya Explorer</p>
+
+    <div class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 mb-6">
+      <h2 class="text-xl font-bold text-cyan-400 mb-3">🎯 Tentang Proyek</h2>
+      <p class="text-slate-300 leading-relaxed">
+        <strong>Astrophere</strong> adalah media pembelajaran berbasis Augmented Reality yang dirancang 
+        untuk siswa SMP Kelas 7 dalam mempelajari materi Sistem Tata Surya (KD 3.11 & 4.11). 
+        Website ini memadukan teknologi WebAR dengan materi interaktif, kuis, dan galeri marker untuk 
+        menciptakan pengalaman belajar yang menyenangkan.
+      </p>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 mb-6">
+      <h2 class="text-xl font-bold text-cyan-400 mb-3">👥 Tim Pengembang</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="text-center p-4 rounded-xl bg-white/5">
+          <div class="text-4xl mb-2">👨‍🏫</div>
+          <p class="font-semibold">Guru IPA</p>
+          <p class="text-xs text-slate-400">Konten Materi</p>
+        </div>
+        <div class="text-center p-4 rounded-xl bg-white/5">
+          <div class="text-4xl mb-2">👨‍💻</div>
+          <p class="font-semibold">Developer</p>
+          <p class="text-xs text-slate-400">Web & AR</p>
+        </div>
+        <div class="text-center p-4 rounded-xl bg-white/5">
+          <div class="text-4xl mb-2">🎨</div>
+          <p class="font-semibold">Designer</p>
+          <p class="text-xs text-slate-400">UI/UX</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 mb-6">
+      <h2 class="text-xl font-bold text-cyan-400 mb-3">⚙️ Teknologi</h2>
+      <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm">HTML5</span>
+        <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm">Tailwind CSS</span>
+        <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm">JavaScript</span>
+        <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm">Model-Viewer</span>
+        <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-sm">WebXR</span>
+      </div>
+    </div>
+
+    <div class="p-6 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 mb-6">
+      <h2 class="text-xl font-bold text-cyan-400 mb-4">📬 Hubungi Kami</h2>
+      <form onsubmit="event.preventDefault();alert('Terima kasih atas feedback-mu! 🚀')" class="space-y-3">
+        <input type="text" placeholder="Nama" required class="w-full px-4 py-2 rounded-lg bg-white/5 border border-cyan-500/20 focus:border-cyan-400 outline-none text-white">
+        <input type="email" placeholder="Email" required class="w-full px-4 py-2 rounded-lg bg-white/5 border border-cyan-500/20 focus:border-cyan-400 outline-none text-white">
+        <textarea placeholder="Pesan" rows="3" required class="w-full px-4 py-2 rounded-lg bg-white/5 border border-cyan-500/20 focus:border-cyan-400 outline-none text-white"></textarea>
+        <button type="submit" class="px-6 py-2 rounded-full bg-cyan-500 text-black font-semibold hover:bg-cyan-400">Kirim Pesan</button>
+      </form>
+    </div>
+
+    <p class="text-center text-xs text-slate-500">© 2025 Astrophere · Dibuat untuk pembelajaran SMP</p>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="border-t border-cyan-500/20 py-6 text-center text-sm text-slate-500">
+  © 2025 Astrophere · Media Pembelajaran IPA SMP
+</footer>
+
+<script>
+/* ============== DATA PLANET ============== */
+const planets = [
+  { name: "Merkurius", cls: "merkurius", diameter: "4.879 km", distance: "58 juta km", rotation: "59 hari", revolution: "88 hari",
+    fact: "Planet terkecil dan terdekat dengan Matahari. Suhu siang 430°C, malam -180°C.", emoji: "🪨" },
+  { name: "Venus", cls: "venus", diameter: "12.104 km", distance: "108 juta km", rotation: "243 hari", revolution: "225 hari",
+    fact: "Planet terpanas (462°C) karena efek rumah kaca. Berputar berlawanan arah.", emoji: "🌟" },
+  { name: "Bumi", cls: "bumi", diameter: "12.742 km", distance: "150 juta km", rotation: "24 jam", revolution: "365¼ hari",
+    fact: "Satu-satunya planet yang diketahui memiliki kehidupan.", emoji: "🌍" },
+  { name: "Mars", cls: "mars", diameter: "6.779 km", distance: "228 juta km", rotation: "24,6 jam", revolution: "687 hari",
+    fact: "Dijuluki Planet Merah karena tanahnya mengandung besi oksida.", emoji: "🔴" },
+  { name: "Jupiter", cls: "jupiter", diameter: "139.820 km", distance: "778 juta km", rotation: "10 jam", revolution: "12 tahun",
+    fact: "Planet terbesar. Punya Bintik Merah Raksasa, badai ribuan tahun.", emoji: "🟠" },
+  { name: "Saturnus", cls: "saturnus", diameter: "116.460 km", distance: "1,43 miliar km", rotation: "10,7 jam", revolution: "29 tahun",
+    fact: "Terkenal dengan cincin es dan batu yang indah.", emoji: "🪐" },
+  { name: "Uranus", cls: "uranus", diameter: "50.724 km", distance: "2,87 miliar km", rotation: "17 jam", revolution: "84 tahun",
+    fact: "Berputar miring 98° sehingga 'rebah' saat mengorbit.", emoji: "🔵" },
+  { name: "Neptunus", cls: "neptunus", diameter: "49.244 km", distance: "4,5 miliar km", rotation: "16 jam", revolution: "165 tahun",
+    fact: "Planet terjauh. Angin di sini tercepat di tata surya (±2.100 km/jam).", emoji: "💙" }
+];
+
+/* ============== NAVIGASI ============== */
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) { target.classList.add('active'); window.scrollTo(0, 0); }
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const navLink = document.querySelector(`.nav-link[data-page="${page}"]`);
+  if (navLink) navLink.classList.add('active');
+}
+function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+
+/* ============== HOME: PREVIEW PLANET ============== */
+function renderPlanetPreview() {
+  const container = document.getElementById('planetPreview');
+  container.innerHTML = planets.map((p, i) => `
+    <div class="text-center cursor-pointer card-hover p-4 rounded-2xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/10" onclick="openPlanetInfo(${i})">
+      <div class="planet-icon ${p.cls} mx-auto mb-3"></div>
+      <h4 class="font-bold text-sm">${p.name}</h4>
+      <p class="text-xs text-slate-400">${p.diameter}</p>
+    </div>
+  `).join('');
+}
+renderPlanetPreview();
+
+/* ============== AR VIEWER ============== */
+function renderPlanetButtons() {
+  const container = document.getElementById('planetButtons');
+  container.innerHTML = planets.map((p, i) => `
+    <button onclick="selectPlanet(${i})" class="px-3 py-2 rounded-full bg-blue-900/30 border border-cyan-500/30 text-sm hover:bg-cyan-500/20 transition flex items-center gap-2">
+      <span class="planet-icon ${p.cls}" style="width:24px;height:24px;font-size:0;"></span>
+      <span>${p.name}</span>
+    </button>
+  `).join('');
+}
+renderPlanetButtons();
+
+function selectPlanet(i) {
+  const p = planets[i];
+  document.getElementById('viewerLabel').innerText = `${p.emoji} ${p.name} (Demo Model)`;
+  document.getElementById('infoName').innerText = `${p.emoji} ${p.name}`;
+  document.getElementById('infoDiameter').innerText = p.diameter;
+  document.getElementById('infoDistance').innerText = p.distance;
+  document.getElementById('infoRotation').innerText = p.rotation;
+  document.getElementById('infoRevolution').innerText = p.revolution;
+  document.getElementById('infoFact').innerText = p.fact;
+  document.getElementById('planetInfo').classList.remove('hidden');
+  document.getElementById('planetInfo').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function openPlanetInfo(i) {
+  showPage('ar');
+  setTimeout(() => selectPlanet(i), 300);
+}
+
+/* ============== MATERI PLANET ============== */
+function renderMateriPlanet() {
+  const container = document.getElementById('materiPlanet');
+  container.innerHTML = planets.map((p, i) => `
+    <div class="p-4 rounded-xl bg-blue-900/20 backdrop-blur-sm border border-cyan-500/20 card-hover">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="planet-icon ${p.cls}" style="width:44px;height:44px;font-size:0;"></div>
+        <h3 class="font-bold text-cyan-400">${p.emoji} ${p.name}</h3>
+      </div>
+      <p class="text-xs text-slate-400 mb-2">Diameter: ${p.diameter} · Jarak: ${p.distance}</p>
+      <p class="text-sm text-slate-300">${p.fact}</p>
+    </div>
+  `).join('');
+}
+renderMateriPlanet();
+
+/* ============== KUIS ============== */
+const quizData = [
+  { q: "Planet terdekat dengan Matahari adalah...", o: ["Venus", "Merkurius", "Bumi", "Mars"], a: 1, e: "Merkurius adalah planet terdekat dari Matahari." },
+  { q: "Planet terbesar di Tata Surya adalah...", o: ["Saturnus", "Neptunus", "Jupiter", "Uranus"], a: 2, e: "Jupiter adalah planet terbesar, diameternya 139.820 km." },
+  { q: "Planet yang dikenal dengan cincinnya yang indah adalah...", o: ["Mars", "Saturnus", "Venus", "Merkurius"], a: 1, e: "Saturnus terkenal karena cincin es dan batu." },
+  { q: "Berapa lama Bumi melakukan satu kali rotasi?", o: ["12 jam", "24 jam", "48 jam", "365 hari"], a: 1, e: "Bumi berotasi selama 24 jam, menyebabkan siang-malam." },
+  { q: "Planet yang dijuluki 'Planet Merah' adalah...", o: ["Venus", "Jupiter", "Mars", "Merkurius"], a: 2, e: "Mars berwarna merah karena tanahnya mengandung besi oksida." },
+  { q: "Benda langit yang mengelilingi planet disebut...", o: ["Komet", "Asteroid", "Satelit", "Meteoroid"], a: 2, e: "Satelit adalah benda langit yang mengorbit planet." },
+  { q: "Planet terpanas di Tata Surya adalah...", o: ["Merkurius", "Venus", "Mars", "Jupiter"], a: 1, e: "Venus terpanas (462°C) karena efek rumah kaca ekstrem." },
+  { q: "Apa yang menyebabkan terjadinya perubahan musim di Bumi?", o: ["Rotasi", "Revolusi", "Gerhana", "Pasang surut"], a: 1, e: "Revolusi Bumi mengelilingi Matahari menyebabkan perubahan musim." },
+  { q: "Planet yang berputar miring 98° adalah...", o: ["Uranus", "Neptunus", "Saturnus", "Mars"], a: 0, e: "Uranus berputar miring 98° sehingga tampak 'rebah'." },
+  { q: "Matahari tersusun terutama dari gas...", o: ["Oksigen", "Hidrogen", "Nitrogen", "Karbon"], a: 1, e: "Matahari tersusun dari 74% hidrogen dan 25% helium." }
+];
+
+let currentQ = 0, score = 0, answered = false;
+
+function startQuiz() {
+  currentQ = 0; score = 0; answered = false;
+  document.getElementById('quizStart').classList.add('hidden');
+  document.getElementById('quizResult').classList.add('hidden');
+  document.getElementById('quizPlay').classList.remove('hidden');
+  document.getElementById('quizScore').innerText = '0';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = quizData[currentQ];
+  document.getElementById('quizProgress').innerText = `Soal ${currentQ + 1} dari ${quizData.length}`;
+  document.getElementById('quizBar').style.width = `${((currentQ) / quizData.length) * 100}%`;
+  document.getElementById('quizQuestion').innerText = q.q;
+  const opts = document.getElementById('quizOptions');
+  opts.innerHTML = q.o.map((o, i) => `
+    <div class="quiz-option p-3 rounded-xl border border-cyan-500/30 bg-white/5 flex items-center gap-3" onclick="answerQuiz(${i})">
+      <span class="w-8 h-8 flex items-center justify-center rounded-full bg-cyan-500/20 font-bold text-cyan-300">${String.fromCharCode(65 + i)}</span>
+      <span>${o}</span>
+    </div>
+  `).join('');
+  document.getElementById('quizFeedback').classList.add('hidden');
+  document.getElementById('quizNext').classList.add('hidden');
+}
+
+function answerQuiz(i) {
+  if (answered) return;
+  answered = true;
+  const q = quizData[currentQ];
+  const options = document.querySelectorAll('#quizOptions .quiz-option');
+  const fb = document.getElementById('quizFeedback');
+
+  if (i === q.a) {
+    options[i].classList.add('correct');
+    score += 10;
+    document.getElementById('quizScore').innerText = score;
+    fb.className = 'mt-4 p-3 rounded-lg text-sm bg-green-500/20 border border-green-500/40 text-green-300';
+    fb.innerText = '✅ Benar! ' + q.e;
+  } else {
+    options[i].classList.add('wrong');
+    options[q.a].classList.add('correct');
+    fb.className = 'mt-4 p-3 rounded-lg text-sm bg-red-500/20 border border-red-500/40 text-red-300';
+    fb.innerText = '❌ Salah. ' + q.e;
+  }
+  fb.classList.remove('hidden');
+  document.getElementById('quizNext').classList.remove('hidden');
+  document.getElementById('quizNext').innerText = currentQ === quizData.length - 1 ? 'Lihat Hasil →' : 'Soal Berikutnya →';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= quizData.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('quizPlay').classList.add('hidden');
+  document.getElementById('quizResult').classList.remove('hidden');
+  document.getElementById('finalScore').innerText = score;
+  const p = document.getElementById('resultPredicate');
+  const icon = document.getElementById('resultIcon');
+  if (score >= 90) { p.innerText = '🌟 Predikat: Bintang Tata Surya!'; p.className = 'text-xl font-bold mb-6 text-yellow-400'; icon.innerText = '🌟'; }
+  else if (score >= 70) { p.innerText = '🚀 Predikat: Penjelajah Roket!'; p.className = 'text-xl font-bold mb-6 text-cyan-400'; icon.innerText = '🚀'; }
+  else if (score >= 50) { p.innerText = '🪐 Predikat: Astronom Muda!'; p.className = 'text-xl font-bold mb-6 text-orange-400'; icon.innerText = '🪐'; }
+  else { p.innerText = '🌱 Predikat: Pemula — Ayo Belajar Lagi!'; p.className = 'text-xl font-bold mb-6 text-slate-400'; icon.innerText = '🌱'; }
+}
+
+/* ============== GALERI MARKER ============== */
+function renderMarkers() {
+  const container = document.getElementById('markerGrid');
+  container.innerHTML = planets.map((p, i) => `
+    <div class="p-4 rounded-2xl bg-blue-900/20 backdrop-blur-sm border-2 border-cyan-500/30 text-center">
+      <div class="aspect-square bg-white rounded-lg flex items-center justify-center mb-3 relative overflow-hidden">
+        <div class="text-center">
+          <div class="flex justify-center mb-2">
+            <div class="planet-icon ${p.cls}" style="width:60px;height:60px;font-size:0;"></div>
+          </div>
+          <div class="text-black font-bold text-xs">MARKER AR</div>
+          <div class="text-black font-bold text-sm">${p.name.toUpperCase()}</div>
+          <div class="text-black text-[10px] mt-1 opacity-60">${p.emoji} ASTROPHERE</div>
+          <div class="absolute inset-0 border-4 border-dashed border-black/10 m-2 rounded"></div>
+        </div>
+      </div>
+      <h4 class="font-bold text-sm mb-2">${p.name}</h4>
+      <button onclick="downloadMarker('${p.name}')" class="w-full text-xs px-3 py-1 rounded-full bg-cyan-500 text-black font-semibold hover:bg-cyan-400 mb-1">⬇️ Download</button>
+      <button onclick="window.print()" class="w-full text-xs px-3 py-1 rounded-full border border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/10">🖨️ Print</button>
+    </div>
+  `).join('');
+}
+renderMarkers();
+
+function downloadMarker(name) {
+  alert(`Fitur download marker "${name}" — di produksi nyata, tombol ini akan mengunduh file PNG marker dengan pola unik untuk planet ${name}.\n\nGunakan library seperti AR.js atau 8thWall untuk generate marker.`);
+}
+
+function downloadAll() {
+  alert('Fitur download semua marker (ZIP) — di produksi, ini akan mengunduh paket ZIP berisi 8 kartu marker siap cetak.');
+}
+
+/* ============== INISIALISASI ============== */
+showPage('home');
+</script>
+
+</body>
+</html>
